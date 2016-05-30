@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.simoncherry.averagefaceclient.Fragment.CloudDirFragment;
 import com.simoncherry.averagefaceclient.Fragment.OutputDirFragment;
 import com.simoncherry.averagefaceclient.Fragment.LocalDirFragment;
+import com.simoncherry.averagefaceclient.Fragment.ResultFragment;
 import com.simoncherry.averagefaceclient.R;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.Callback;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.jpush.android.api.JPushInterface;
 import okhttp3.Call;
 import okhttp3.Response;
 
@@ -43,7 +45,8 @@ public class UserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         CloudDirFragment.OnFragmentInteractionListener,
         LocalDirFragment.OnFragmentInteractionListener,
-        OutputDirFragment.OnFragmentInteractionListener{
+        OutputDirFragment.OnFragmentInteractionListener,
+        ResultFragment.OnFragmentInteractionListener{
 
     private ViewGroup fragment_container;
     private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
@@ -126,6 +129,14 @@ public class UserActivity extends AppCompatActivity
         });
 
         fragment_container = (ViewGroup) findViewById(R.id.fragment_container);
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        whichFragment = "cloud";
+        ft.replace(R.id.fragment_container, new CloudDirFragment(), "cloud");
+        ft.commit();
+
+        JPushInterface.setDebugMode(true);
+        JPushInterface.init(this);
     }
 
     @Override
@@ -171,10 +182,23 @@ public class UserActivity extends AppCompatActivity
                                     }
                                 }
                             }.start();
+
+                            FragmentManager fm = getSupportFragmentManager();
+                            FragmentTransaction ft = fm.beginTransaction();
+                            whichFragment = "result";
+                            ft.replace(R.id.fragment_container, new ResultFragment(), "result");
+                            ft.commit();
                         }
                     })
                     .setNegativeButton("取消", null)
                     .show();
+
+//            FragmentManager fm = getSupportFragmentManager();
+//            FragmentTransaction ft = fm.beginTransaction();
+//            whichFragment = "result";
+//            ft.replace(R.id.fragment_container, new ResultFragment(), "result");
+//            ft.commit();
+
             return true;
         }
 
@@ -331,4 +355,8 @@ public class UserActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 }

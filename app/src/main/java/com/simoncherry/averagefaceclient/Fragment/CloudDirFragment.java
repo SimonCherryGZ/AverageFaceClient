@@ -28,6 +28,9 @@ import com.zhy.http.okhttp.callback.StringCallback;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.srain.cube.views.ptr.PtrClassicFrameLayout;
+import in.srain.cube.views.ptr.PtrDefaultHandler;
+import in.srain.cube.views.ptr.PtrFrameLayout;
 import okhttp3.Call;
 
 
@@ -54,7 +57,7 @@ public class CloudDirFragment extends Fragment {
     private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
     private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/faceset/";
     String reqStr = "null";
-    String selectDir = "test";
+    String selectDir = "root";
     private ImageLoader mImageLoader;
 
     private ListView list_dir;
@@ -62,6 +65,7 @@ public class CloudDirFragment extends Fragment {
     private List<DirectoryBean> bean_dir;
     private TextView tv_show_test;
     private GridView gv_img;
+    private PtrClassicFrameLayout ptr;
 
     public CloudDirFragment() {
         // Required empty public constructor
@@ -143,6 +147,7 @@ public class CloudDirFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 list_dir.setVisibility(View.GONE);
+                ptr.setVisibility(View.GONE);
                 selectDir = bean_dir.get(position).getFileName();
                 mListener.setWhichFolder(selectDir);
 //                new Thread()
@@ -180,6 +185,20 @@ public class CloudDirFragment extends Fragment {
 
         tv_show_test = (TextView) getActivity().findViewById(R.id.tv_show_test);
         gv_img = (GridView) getActivity().findViewById(R.id.gv_img);
+        ptr = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
+        ptr.setPtrHandler(new PtrDefaultHandler() {
+            @Override
+            public void onRefreshBegin(PtrFrameLayout frame) {
+                refreshFolder(selectDir);
+                ptr.refreshComplete();
+            }
+
+            @Override
+            public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
+                // 默认实现，根据实际情况做改动
+                return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
+            }
+        });
 
 //        new Thread()
 //        {
@@ -288,7 +307,9 @@ public class CloudDirFragment extends Fragment {
     }
 
     public void backUpperLevel(){
+        selectDir = "root";
         gv_img.setVisibility(View.GONE);
+        ptr.setVisibility(View.VISIBLE);
         list_dir.setVisibility(View.VISIBLE);
     }
 
