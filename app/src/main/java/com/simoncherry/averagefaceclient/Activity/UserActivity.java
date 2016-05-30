@@ -28,13 +28,21 @@ import com.simoncherry.averagefaceclient.Fragment.OutputDirFragment;
 import com.simoncherry.averagefaceclient.Fragment.LocalDirFragment;
 import com.simoncherry.averagefaceclient.Fragment.ResultFragment;
 import com.simoncherry.averagefaceclient.R;
+import com.wangjie.androidbucket.utils.ABTextUtil;
+import com.wangjie.rapidfloatingactionbutton.RapidFloatingActionButton;
+import com.wangjie.rapidfloatingactionbutton.RapidFloatingActionHelper;
+import com.wangjie.rapidfloatingactionbutton.RapidFloatingActionLayout;
+import com.wangjie.rapidfloatingactionbutton.contentimpl.labellist.RFACLabelItem;
+import com.wangjie.rapidfloatingactionbutton.contentimpl.labellist.RapidFloatingActionContentLabelList;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.Callback;
 import com.zhy.http.okhttp.callback.StringCallback;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.jpush.android.api.JPushInterface;
@@ -46,7 +54,8 @@ public class UserActivity extends AppCompatActivity
         CloudDirFragment.OnFragmentInteractionListener,
         LocalDirFragment.OnFragmentInteractionListener,
         OutputDirFragment.OnFragmentInteractionListener,
-        ResultFragment.OnFragmentInteractionListener{
+        ResultFragment.OnFragmentInteractionListener,
+        RapidFloatingActionContentLabelList.OnRapidFloatingActionContentLabelListListener{
 
     private ViewGroup fragment_container;
     private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
@@ -60,6 +69,10 @@ public class UserActivity extends AppCompatActivity
     FloatingActionButton fab;
     private final static int FILE_SELECT_CODE = 0x123;
     private String whichFolder = "root";
+    //=============================================================================================
+    private RapidFloatingActionLayout rfaLayout;
+    private RapidFloatingActionButton rfaBtn;
+    private RapidFloatingActionHelper rfabHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,48 +98,51 @@ public class UserActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                if(!isInFolder){
-                    final EditText editText = new EditText(UserActivity.this);
-                    new AlertDialog.Builder(UserActivity.this).setTitle("新建人脸目录").setMessage("输入目录名称")
-                            .setIcon(android.R.drawable.ic_dialog_info).setView(editText)
-                            .setPositiveButton("确定", new DialogInterface.OnClickListener(){
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    final String dirName = editText.getText().toString();
-                                    //Toast.makeText(UserActivity.this, dirName, Toast.LENGTH_SHORT).show();
-                                    new Thread(){
-                                        @Override
-                                        public void run(){
-                                            OkHttpUtils.get().url(dirUrl)
-                                                    .addParams("request", "newdir")
-                                                    .addParams("data", dirName)
-                                                    .build().execute(new StringCallback() {
-                                                @Override
-                                                public void onError(Call call, Exception e) {
-                                                }
-                                                @Override
-                                                public void onResponse(String response) {
-                                                    Toast.makeText(UserActivity.this, response, Toast.LENGTH_SHORT).show();
-                                                }
-                                            });
-                                        }
-                                    }.start();
-                                }
-                            })
-                            .setNegativeButton("取消", null)
-                            .show();
-                }else{ // isInFolder == true
-                    showFileChooser();
-                }
-            }
-        });
+//        //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+////                        .setAction("Action", null).show();
+//                if(!isInFolder){
+//                    final EditText editText = new EditText(UserActivity.this);
+//                    new AlertDialog.Builder(UserActivity.this).setTitle("新建人脸目录").setMessage("输入目录名称")
+//                            .setIcon(android.R.drawable.ic_dialog_info).setView(editText)
+//                            .setPositiveButton("确定", new DialogInterface.OnClickListener(){
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    final String dirName = editText.getText().toString();
+//                                    //Toast.makeText(UserActivity.this, dirName, Toast.LENGTH_SHORT).show();
+//                                    new Thread(){
+//                                        @Override
+//                                        public void run(){
+//                                            OkHttpUtils.get().url(dirUrl)
+//                                                    .addParams("request", "newdir")
+//                                                    .addParams("data", dirName)
+//                                                    .build().execute(new StringCallback() {
+//                                                @Override
+//                                                public void onError(Call call, Exception e) {
+//                                                }
+//                                                @Override
+//                                                public void onResponse(String response) {
+//                                                    Toast.makeText(UserActivity.this, response, Toast.LENGTH_SHORT).show();
+//                                                }
+//                                            });
+//                                        }
+//                                    }.start();
+//                                }
+//                            })
+//                            .setNegativeButton("取消", null)
+//                            .show();
+//                }else{ // isInFolder == true
+//                    showFileChooser();
+//                }
+//            }
+//        });
+        rfaLayout = (RapidFloatingActionLayout ) findViewById(R.id.activity_main_rfal);
+        rfaBtn = (RapidFloatingActionButton ) findViewById(R.id.activity_main_rfab);
+        setRfabItem(0);
 
         fragment_container = (ViewGroup) findViewById(R.id.fragment_container);
         FragmentManager fm = getSupportFragmentManager();
@@ -137,6 +153,28 @@ public class UserActivity extends AppCompatActivity
 
         JPushInterface.setDebugMode(true);
         JPushInterface.init(this);
+    }
+
+    @Override
+    public void onRFACItemLabelClick(int i, RFACLabelItem rfacLabelItem) {
+        Toast.makeText(this, "clicked label: " + i, Toast.LENGTH_SHORT).show();
+        rfabHelper.toggleContent();
+    }
+
+    @Override
+    public void onRFACItemIconClick(int i, RFACLabelItem rfacLabelItem) {
+        //Toast.makeText(this, "clicked icon: " + i, Toast.LENGTH_SHORT).show();
+        if(!isInFolder){
+            showCreateDirDialog();
+        }else{ // isInFolder == true
+            if(i == 0) {
+                showFileChooser();
+            }else if(i == 1){
+                showMerageDirDialog();
+            }
+        }
+
+        rfabHelper.toggleContent();
     }
 
     @Override
@@ -212,7 +250,8 @@ public class UserActivity extends AppCompatActivity
                 UserActivity.this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-        fab.setImageResource(R.drawable.ic_folder_shared_white_48dp);
+        //fab.setImageResource(R.drawable.ic_folder_shared_white_48dp);
+        setRfabItem(0);
         isInFolder = false;
         whichFolder = "root";
 
@@ -250,15 +289,17 @@ public class UserActivity extends AppCompatActivity
     @Override
     public void setWhetherInFolder(Boolean isInFolder) {
         this.isInFolder = isInFolder;
-        if(this.isInFolder == true){
+        if(this.isInFolder){
             toggle.setDrawerIndicatorEnabled(false);
             //toolbar.setNavigationIcon(R.drawable.ic_arrow_back_grey600_48dp);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             toolbar.setNavigationOnClickListener(navigationClickListener);
 
-            fab.setImageResource(R.drawable.ic_add_white_48dp);
+            //fab.setImageResource(R.drawable.ic_add_white_48dp);
+            setRfabItem(1);
         }else{
             //fab.setImageResource(R.drawable.ic_folder_shared_white_48dp);
+            setRfabItem(0);
         }
     }
 
@@ -294,7 +335,8 @@ public class UserActivity extends AppCompatActivity
                 drawer.setDrawerListener(toggle);
                 toggle.syncState();
 
-                fab.setImageResource(R.drawable.ic_folder_shared_white_48dp);
+                //fab.setImageResource(R.drawable.ic_folder_shared_white_48dp);
+                setRfabItem(0);
             }else{
 
             }
@@ -359,4 +401,139 @@ public class UserActivity extends AppCompatActivity
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+    private void setRfabItem(int which){
+        RapidFloatingActionContentLabelList rfaContent = new RapidFloatingActionContentLabelList(this);
+        rfaContent.setOnRapidFloatingActionContentLabelListListener(this);
+        List<RFACLabelItem> items = new ArrayList<>();
+        switch(which){
+            case 0 :
+                items.add(new RFACLabelItem<Integer>()
+                        .setLabel("新建")
+                        .setResId(R.drawable.ic_folder_shared_white_48dp)
+                        .setIconNormalColor(R.color.colorAccent)
+                        .setIconPressedColor(R.color.colorAccentDark)
+                        .setWrapper(0)
+                );
+                break;
+            case 1 :
+                items.add(new RFACLabelItem<Integer>()
+                        .setLabel("上传")
+                        .setResId(R.drawable.ic_file_upload_white_48dp)
+                        .setIconNormalColor(R.color.colorAccent)
+                        .setIconPressedColor(R.color.colorAccentDark)
+                        .setWrapper(0)
+                );
+                items.add(new RFACLabelItem<Integer>()
+                        .setLabel("合成")
+                        .setResId(R.drawable.ic_group_add_white_48dp)
+                        .setIconNormalColor(R.color.colorAccent)
+                        .setIconPressedColor(R.color.colorAccentDark)
+                        .setWrapper(1)
+                );
+                break;
+            case 2 :
+                items.add(new RFACLabelItem<Integer>()
+                        .setLabel("保存")
+                        .setResId(R.drawable.ic_file_download_white_48dp)
+                        .setIconNormalColor(R.color.colorAccent)
+                        .setIconPressedColor(R.color.colorAccentDark)
+                        .setWrapper(0)
+                );
+                items.add(new RFACLabelItem<Integer>()
+                        .setLabel("搜索")
+                        .setResId(R.drawable.ic_pageview_white_48dp)
+                        .setIconNormalColor(R.color.colorAccent)
+                        .setIconPressedColor(R.color.colorAccentDark)
+                        .setWrapper(1)
+                );
+                break;
+            default:
+                break;
+        }
+        rfaContent
+                .setItems(items)
+                .setIconShadowRadius(ABTextUtil.dip2px(this, 5))
+                .setIconShadowColor(0xff888888)
+                .setIconShadowDy(ABTextUtil.dip2px(this, 5))
+        ;
+        rfabHelper = new RapidFloatingActionHelper(
+                this,
+                rfaLayout,
+                rfaBtn,
+                rfaContent
+        ).build();
+    }
+
+    private void showCreateDirDialog(){
+        final EditText editText = new EditText(UserActivity.this);
+        new AlertDialog.Builder(UserActivity.this).setTitle("新建人脸目录").setMessage("输入目录名称")
+                .setIcon(android.R.drawable.ic_dialog_info).setView(editText)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String dirName = editText.getText().toString();
+                        //Toast.makeText(UserActivity.this, dirName, Toast.LENGTH_SHORT).show();
+                        new Thread(){
+                            @Override
+                            public void run(){
+                                OkHttpUtils.get().url(dirUrl)
+                                        .addParams("request", "newdir")
+                                        .addParams("data", dirName)
+                                        .addParams("type", "faceset")
+                                        .build().execute(new StringCallback() {
+                                    @Override
+                                    public void onError(Call call, Exception e) {
+                                    }
+                                    @Override
+                                    public void onResponse(String response) {
+                                        if(whichFragment.equals("cloud")){
+                                            CloudDirFragment currentFragment = (CloudDirFragment)getSupportFragmentManager().findFragmentByTag("cloud");
+                                            currentFragment.refreshFolder(whichFolder);
+                                        }
+                                        Toast.makeText(UserActivity.this, response, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        }.start();
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    private void showMerageDirDialog(){
+        final EditText editText = new EditText(this);
+        new AlertDialog.Builder(this)
+                .setTitle("确定合成 " + whichFolder + " 目录内图片的平均脸吗？")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                //.setView(editText)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog,int which) {
+                        //final String path = editText.getText().toString();
+                        final String path = whichFolder;
+                        new Thread(){
+                            @Override
+                            public void run(){
+                                try {
+                                    OkHttpUtils.post().url(mergeUrl).addParams("path", path).build().execute();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
+
+                        FragmentManager fm = getSupportFragmentManager();
+                        FragmentTransaction ft = fm.beginTransaction();
+                        whichFragment = "result";
+                        ft.replace(R.id.fragment_container, new ResultFragment(), "result");
+                        ft.commit();
+                        setRfabItem(2);
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
 }
