@@ -150,22 +150,7 @@ public class CloudDirFragment extends Fragment {
                 ptr.setVisibility(View.GONE);
                 selectDir = bean_dir.get(position).getFileName();
                 mListener.setWhichFolder(selectDir);
-//                new Thread()
-//                {
-//                    @Override
-//                    public void run()
-//                    {
-//                        try {
-//                            reqStr = NetWorkUtil.sendRequest(dirUrl, "imglist", selectDir, "UTF-8");
-//                            // 发送消息通知UI线程更新UI组件
-//                            handler.sendEmptyMessage(0x456);
-//
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                    }
-//                }.start();
+
                 OkHttpUtils.get().url(dirUrl)
                         .addParams("request", "imglist")
                         .addParams("data", selectDir)
@@ -200,22 +185,6 @@ public class CloudDirFragment extends Fragment {
             }
         });
 
-//        new Thread()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                try {
-//                    reqStr = NetWorkUtil.sendRequest(dirUrl, "getdir", "null", "UTF-8");
-//                    // 发送消息通知UI线程更新UI组件
-//                    handler.sendEmptyMessage(0x123);
-//
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//
-//            }
-//        }.start();
         OkHttpUtils.get().url(dirUrl)
                 .addParams("request", "getdir")
                 .addParams("data", "null")

@@ -1,31 +1,33 @@
 package com.simoncherry.averagefaceclient.Activity;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.util.Log;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.simoncherry.averagefaceclient.Fragment.CloudDirFragment;
-import com.simoncherry.averagefaceclient.Fragment.OutputDirFragment;
 import com.simoncherry.averagefaceclient.Fragment.LocalDirFragment;
+import com.simoncherry.averagefaceclient.Fragment.OutputDirFragment;
 import com.simoncherry.averagefaceclient.Fragment.ResultFragment;
 import com.simoncherry.averagefaceclient.R;
 import com.wangjie.androidbucket.utils.ABTextUtil;
@@ -39,6 +41,8 @@ import com.zhy.http.okhttp.callback.Callback;
 import com.zhy.http.okhttp.callback.StringCallback;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +61,7 @@ public class UserActivity extends AppCompatActivity
         ResultFragment.OnFragmentInteractionListener,
         RapidFloatingActionContentLabelList.OnRapidFloatingActionContentLabelListListener{
 
-    private ViewGroup fragment_container;
+    //private ViewGroup fragment_container;
     private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
     private String mergeUrl = "http://192.168.1.102:8128/AverageFaceServer/MergeFaceServlet";
     private String uploadUrl = "http://192.168.1.102:8128/AverageFaceServer/UploadFileServlet";
@@ -66,7 +70,7 @@ public class UserActivity extends AppCompatActivity
     Toolbar toolbar;
     DrawerLayout drawer;
     ActionBarDrawerToggle toggle;
-    FloatingActionButton fab;
+    //FloatingActionButton fab;
     private final static int FILE_SELECT_CODE = 0x123;
     private String whichFolder = "root";
     //=============================================================================================
@@ -78,17 +82,10 @@ public class UserActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-//        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_grey600_48dp);
-//        toolbar.setNavigationOnClickListener(navigationClickListener);
 
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-//            this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        drawer.setDrawerListener(toggle);
-//        toggle.syncState();
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("云端目录");
+        setSupportActionBar(toolbar);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
             this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -98,53 +95,11 @@ public class UserActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-////                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-////                        .setAction("Action", null).show();
-//                if(!isInFolder){
-//                    final EditText editText = new EditText(UserActivity.this);
-//                    new AlertDialog.Builder(UserActivity.this).setTitle("新建人脸目录").setMessage("输入目录名称")
-//                            .setIcon(android.R.drawable.ic_dialog_info).setView(editText)
-//                            .setPositiveButton("确定", new DialogInterface.OnClickListener(){
-//                                @Override
-//                                public void onClick(DialogInterface dialog, int which) {
-//                                    final String dirName = editText.getText().toString();
-//                                    //Toast.makeText(UserActivity.this, dirName, Toast.LENGTH_SHORT).show();
-//                                    new Thread(){
-//                                        @Override
-//                                        public void run(){
-//                                            OkHttpUtils.get().url(dirUrl)
-//                                                    .addParams("request", "newdir")
-//                                                    .addParams("data", dirName)
-//                                                    .build().execute(new StringCallback() {
-//                                                @Override
-//                                                public void onError(Call call, Exception e) {
-//                                                }
-//                                                @Override
-//                                                public void onResponse(String response) {
-//                                                    Toast.makeText(UserActivity.this, response, Toast.LENGTH_SHORT).show();
-//                                                }
-//                                            });
-//                                        }
-//                                    }.start();
-//                                }
-//                            })
-//                            .setNegativeButton("取消", null)
-//                            .show();
-//                }else{ // isInFolder == true
-//                    showFileChooser();
-//                }
-//            }
-//        });
         rfaLayout = (RapidFloatingActionLayout ) findViewById(R.id.activity_main_rfal);
         rfaBtn = (RapidFloatingActionButton ) findViewById(R.id.activity_main_rfab);
         setRfabItem(0);
 
-        fragment_container = (ViewGroup) findViewById(R.id.fragment_container);
+        //fragment_container = (ViewGroup) findViewById(R.id.fragment_container);
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         whichFragment = "cloud";
@@ -153,6 +108,18 @@ public class UserActivity extends AppCompatActivity
 
         JPushInterface.setDebugMode(true);
         JPushInterface.init(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        JPushInterface.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        JPushInterface.onPause(this);
     }
 
     @Override
@@ -166,11 +133,34 @@ public class UserActivity extends AppCompatActivity
         //Toast.makeText(this, "clicked icon: " + i, Toast.LENGTH_SHORT).show();
         if(!isInFolder){
             showCreateDirDialog();
-        }else{ // isInFolder == true
-            if(i == 0) {
-                showFileChooser();
-            }else if(i == 1){
-                showMerageDirDialog();
+        }else{
+            if(whichFragment.equals("cloud")) {
+//                if (i == 0) {
+//                    showFileChooser();
+//                } else if (i == 1) {
+//                    showMerageDirDialog();
+//                }
+                switch (i){
+                    case 0:
+                        showFileChooser();
+                        break;
+                    case 1:
+                        showMerageDirDialog();
+                        break;
+                    default:
+                        break;
+                }
+            }else if(whichFragment.equals("result")){
+                switch (i){
+                    case 0:
+                        FragmentManager fm = getSupportFragmentManager();
+                        Fragment rf = fm.findFragmentByTag("result");
+                        Bitmap bitmap = convertViewToBitmap(rf.getView().findViewById(R.id.img_result));
+                        downloadResultPicture(bitmap, "AverageFaceClient");
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -183,7 +173,26 @@ public class UserActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if(isInFolder){
+                handleHomeAsUpBtn();
+            }else {
+                //super.onBackPressed();
+                new AlertDialog.Builder(UserActivity.this).setTitle("提示").setMessage("确定要退出本应用吗？")
+                        .setIcon(R.drawable.ic_error_grey600_48dp)
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                UserActivity.this.finish();
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).show();
+            }
         }
     }
 
@@ -200,43 +209,9 @@ public class UserActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             // TODO
-            final EditText editText = new EditText(this);
-            new AlertDialog.Builder(this).setTitle("请输入").setIcon(android.R.drawable.ic_dialog_info).setView(editText)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener(){
-                        @Override
-                        public void onClick(DialogInterface dialog,int which) {
-                            final String path = editText.getText().toString();
-                            new Thread(){
-                                @Override
-                                public void run(){
-                                    try {
-                                        OkHttpUtils.post().url(mergeUrl).addParams("path", path).build().execute();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }.start();
-
-                            FragmentManager fm = getSupportFragmentManager();
-                            FragmentTransaction ft = fm.beginTransaction();
-                            whichFragment = "result";
-                            ft.replace(R.id.fragment_container, new ResultFragment(), "result");
-                            ft.commit();
-                        }
-                    })
-                    .setNegativeButton("取消", null)
-                    .show();
-
-//            FragmentManager fm = getSupportFragmentManager();
-//            FragmentTransaction ft = fm.beginTransaction();
-//            whichFragment = "result";
-//            ft.replace(R.id.fragment_container, new ResultFragment(), "result");
-//            ft.commit();
-
             return true;
         }
 
@@ -250,6 +225,7 @@ public class UserActivity extends AppCompatActivity
                 UserActivity.this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
+
         //fab.setImageResource(R.drawable.ic_folder_shared_white_48dp);
         setRfabItem(0);
         isInFolder = false;
@@ -263,14 +239,17 @@ public class UserActivity extends AppCompatActivity
         if (id == R.id.nav_faceset) {
             // TODO
             whichFragment = "local";
+            toolbar.setTitle("本地目录");
             ft.replace(R.id.fragment_container, new LocalDirFragment(), "local");
             ft.commit();
         } else if (id == R.id.nav_cloud) {
             whichFragment = "cloud";
+            toolbar.setTitle("云端目录");
             ft.replace(R.id.fragment_container, new CloudDirFragment(), "cloud");
             ft.commit();
         } else if (id == R.id.nav_output) {
             whichFragment = "output";
+            toolbar.setTitle("输出目录");
             ft.replace(R.id.fragment_container, new OutputDirFragment(), "output");
             ft.commit();
         } else if (id == R.id.nav_manage) {
@@ -291,7 +270,6 @@ public class UserActivity extends AppCompatActivity
         this.isInFolder = isInFolder;
         if(this.isInFolder){
             toggle.setDrawerIndicatorEnabled(false);
-            //toolbar.setNavigationIcon(R.drawable.ic_arrow_back_grey600_48dp);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             toolbar.setNavigationOnClickListener(navigationClickListener);
 
@@ -306,16 +284,24 @@ public class UserActivity extends AppCompatActivity
     @Override
     public void setWhichFolder(String folder) {
         this.whichFolder = folder;
+        String parentDir = "";
+        if(whichFragment.equals("local")){
+            parentDir = "本地目录";
+        }else if(whichFragment.equals("cloud")){
+            parentDir = "云端目录";
+        }else if(whichFragment.equals("output")){
+            parentDir = "输出目录";
+        }
+        toolbar.setTitle(parentDir + "/" + whichFolder);
     }
 
     View.OnClickListener navigationClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             //Toast.makeText(UserActivity.this, "click navigation", Toast.LENGTH_SHORT).show();
-            if(isInFolder == true){
+            if(isInFolder && !whichFragment.equals("result")){
 
                 if(whichFragment.equals("cloud")){
-                    //Fragment currentFragment = getSupportFragmentManager().findFragmentByTag("cloud");
                     CloudDirFragment currentFragment = (CloudDirFragment)getSupportFragmentManager().findFragmentByTag("cloud");
                     currentFragment.backUpperLevel();
                 }else if(whichFragment.equals("output")){
@@ -325,6 +311,7 @@ public class UserActivity extends AppCompatActivity
 
                 isInFolder = false;
                 whichFolder = "root";
+                toolbar.setTitle("云端目录");
                 if(whichFragment.equals("cloud")){
                     CloudDirFragment currentFragment = (CloudDirFragment)getSupportFragmentManager().findFragmentByTag("cloud");
                     currentFragment.refreshFolder(whichFolder);
@@ -337,8 +324,16 @@ public class UserActivity extends AppCompatActivity
 
                 //fab.setImageResource(R.drawable.ic_folder_shared_white_48dp);
                 setRfabItem(0);
-            }else{
 
+            }else if(isInFolder && whichFragment.equals("result")){
+                FragmentManager fm = getSupportFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                whichFragment = "cloud";
+                //ft.replace(R.id.fragment_container, new CloudDirFragment(), "cloud");
+                ft.remove(fm.findFragmentByTag("result"));
+                ft.show(fm.findFragmentByTag("cloud"));
+                ft.commit();
+                setRfabItem(1);
             }
         }
     };
@@ -379,6 +374,7 @@ public class UserActivity extends AppCompatActivity
                                 if(whichFragment.equals("cloud")){
                                     CloudDirFragment currentFragment = (CloudDirFragment)getSupportFragmentManager().findFragmentByTag("cloud");
                                     currentFragment.refreshFolder(whichFolder);
+                                    Log.v("upload", "refresh: " + whichFolder);
                                 }
                             }
                         }
@@ -468,7 +464,7 @@ public class UserActivity extends AppCompatActivity
     private void showCreateDirDialog(){
         final EditText editText = new EditText(UserActivity.this);
         new AlertDialog.Builder(UserActivity.this).setTitle("新建人脸目录").setMessage("输入目录名称")
-                .setIcon(android.R.drawable.ic_dialog_info).setView(editText)
+                .setIcon(R.drawable.ic_error_grey600_48dp).setView(editText)
                 .setPositiveButton("确定", new DialogInterface.OnClickListener(){
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -503,10 +499,11 @@ public class UserActivity extends AppCompatActivity
     }
 
     private void showMerageDirDialog(){
-        final EditText editText = new EditText(this);
+        //final EditText editText = new EditText(this);
         new AlertDialog.Builder(this)
-                .setTitle("确定合成 " + whichFolder + " 目录内图片的平均脸吗？")
-                .setIcon(android.R.drawable.ic_dialog_info)
+                .setTitle("提示")
+                .setMessage("确定合成 " + whichFolder + " 目录内图片的平均脸吗？")
+                .setIcon(R.drawable.ic_error_grey600_48dp)
                 //.setView(editText)
                 .setPositiveButton("确定", new DialogInterface.OnClickListener(){
                     @Override
@@ -527,13 +524,100 @@ public class UserActivity extends AppCompatActivity
                         FragmentManager fm = getSupportFragmentManager();
                         FragmentTransaction ft = fm.beginTransaction();
                         whichFragment = "result";
-                        ft.replace(R.id.fragment_container, new ResultFragment(), "result");
+                        //ft.replace(R.id.fragment_container, new ResultFragment(), "result");
+                        ft.add(R.id.fragment_container, new ResultFragment(), "result");
+                        ft.hide(fm.findFragmentByTag("cloud"));
                         ft.commit();
                         setRfabItem(2);
                     }
                 })
                 .setNegativeButton("取消", null)
                 .show();
+    }
+
+    private String getSDPath() {
+        File sdDir = Environment.getExternalStorageDirectory();// 获取根目录
+        return sdDir.toString();
+    }
+
+    private void downloadResultPicture(Bitmap bigImg, String savepath){
+        if(getSDPath() == null) {
+            Toast.makeText(this, "没有内存卡", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File file = new File(getSDPath() + "/" +savepath);
+        if(!file.exists()) {
+            boolean res = file.mkdirs();
+            if(!res){
+                Toast.makeText(this, "创建目录失败", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        File imageFile = new File(file, System.currentTimeMillis() + ".jpg");
+        try {
+            imageFile.createNewFile();
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            bigImg.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+            Toast.makeText(this, "图片已保存到 " + getSDPath()+"/"+savepath, Toast.LENGTH_SHORT).show();
+        } catch (FileNotFoundException e) {
+            Toast.makeText(this, "图片保存失败 FileNotFoundException", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        } catch (IOException e) {
+            Toast.makeText(this, "图片保存失败 IOException", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+    private static Bitmap convertViewToBitmap(View view){
+        //view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        //view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        view.setDrawingCacheEnabled(true);
+        view.buildDrawingCache();
+        //Bitmap bitmap = view.getDrawingCache();
+        Bitmap bitmap = view.getDrawingCache().copy(Bitmap.Config.RGB_565, false);
+        view.setDrawingCacheEnabled(false);
+        return bitmap;
+    }
+
+    private void handleHomeAsUpBtn(){
+        if(isInFolder && !whichFragment.equals("result")){
+
+            if(whichFragment.equals("cloud")){
+                CloudDirFragment currentFragment = (CloudDirFragment)getSupportFragmentManager().findFragmentByTag("cloud");
+                currentFragment.backUpperLevel();
+            }else if(whichFragment.equals("output")){
+                OutputDirFragment currentFragment = (OutputDirFragment)getSupportFragmentManager().findFragmentByTag("output");
+                currentFragment.backUpperLevel();
+            }
+
+            isInFolder = false;
+            whichFolder = "root";
+            toolbar.setTitle("云端目录");
+            if(whichFragment.equals("cloud")){
+                CloudDirFragment currentFragment = (CloudDirFragment)getSupportFragmentManager().findFragmentByTag("cloud");
+                currentFragment.refreshFolder(whichFolder);
+            }
+
+            toggle = new ActionBarDrawerToggle(
+                    UserActivity.this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
+
+            //fab.setImageResource(R.drawable.ic_folder_shared_white_48dp);
+            setRfabItem(0);
+
+        }else if(isInFolder && whichFragment.equals("result")){
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            whichFragment = "cloud";
+            //ft.replace(R.id.fragment_container, new CloudDirFragment(), "cloud");
+            ft.remove(fm.findFragmentByTag("result"));
+            ft.show(fm.findFragmentByTag("cloud"));
+            ft.commit();
+            setRfabItem(1);
+        }
     }
 
 }
