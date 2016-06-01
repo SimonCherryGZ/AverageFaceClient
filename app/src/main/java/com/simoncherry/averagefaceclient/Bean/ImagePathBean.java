@@ -1,4 +1,4 @@
-package com.simoncherry.averagefaceclient.Module;
+package com.simoncherry.averagefaceclient.Bean;
 
 public class ImagePathBean{
     String path;

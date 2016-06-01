@@ -18,8 +18,8 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.simoncherry.averagefaceclient.Adapter.DirectoryAdapter;
-import com.simoncherry.averagefaceclient.Module.DirectoryBean;
-import com.simoncherry.averagefaceclient.Module.ImagePathBean;
+import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
+import com.simoncherry.averagefaceclient.Bean.ImagePathBean;
 import com.simoncherry.averagefaceclient.R;
 import com.simoncherry.averagefaceclient.Util.ImageLoader;
 import com.zhy.http.okhttp.OkHttpUtils;

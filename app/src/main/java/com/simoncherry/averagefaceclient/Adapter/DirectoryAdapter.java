@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.simoncherry.averagefaceclient.Module.DirectoryBean;
+import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
 import com.simoncherry.averagefaceclient.R;
 
 import java.text.SimpleDateFormat;

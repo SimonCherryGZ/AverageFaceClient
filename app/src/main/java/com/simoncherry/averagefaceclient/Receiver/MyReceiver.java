@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.simoncherry.averagefaceclient.Activity.UserActivity;
 import com.simoncherry.averagefaceclient.Fragment.ResultFragment;
+import com.simoncherry.averagefaceclient.View.MergeResultFragment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -100,29 +101,11 @@ public class MyReceiver extends BroadcastReceiver {
 		}
 		return sb.toString();
 	}
-	
-	//send msg to MainActivity
-	private void processCustomMessage(Context context, Bundle bundle) {
-//		if (MainActivity.isForeground) {
-//			String message = bundle.getString(JPushInterface.EXTRA_MESSAGE);
-//			String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
-//			Intent msgIntent = new Intent(MainActivity.MESSAGE_RECEIVED_ACTION);
-//			msgIntent.putExtra(MainActivity.KEY_MESSAGE, message);
-//			if (!ExampleUtil.isEmpty(extras)) {
-//				try {
-//					JSONObject extraJson = new JSONObject(extras);
-//					if (null != extraJson && extraJson.length() > 0) {
-//						msgIntent.putExtra(MainActivity.KEY_EXTRAS, extras);
-//					}
-//				} catch (JSONException e) {
-//
-//				}
-//
-//			}
-//			context.sendBroadcast(msgIntent);
-//		}
 
-		Intent mIntent = new Intent(ResultFragment.ACTION_INTENT_RECEIVER);
+	private void processCustomMessage(Context context, Bundle bundle) {
+
+		//Intent mIntent = new Intent(ResultFragment.ACTION_INTENT_RECEIVER);
+		Intent mIntent = new Intent(MergeResultFragment.ACTION_INTENT_RECEIVER);
 		mIntent.putExtra("message", bundle.getString(JPushInterface.EXTRA_MESSAGE));
 		context.sendBroadcast(mIntent);
 	}

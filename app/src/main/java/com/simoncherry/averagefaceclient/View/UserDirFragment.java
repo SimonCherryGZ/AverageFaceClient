@@ -1,0 +1,188 @@
+package com.simoncherry.averagefaceclient.View;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.simoncherry.averagefaceclient.Adapter.DirectoryAdapter;
+import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
+import com.simoncherry.averagefaceclient.Model.UserDirPresenterImple;
+import com.simoncherry.averagefaceclient.R;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.List;
+
+import in.srain.cube.views.ptr.PtrClassicFrameLayout;
+import in.srain.cube.views.ptr.PtrDefaultHandler;
+import in.srain.cube.views.ptr.PtrFrameLayout;
+import okhttp3.Call;
+
+public class UserDirFragment extends Fragment{
+
+    private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
+
+    private UserDirPresenterImple userDirPresenterImple;
+    private ListView list_dir;
+    private DirectoryAdapter adapter_dir;
+    private List<DirectoryBean> bean_dir;
+    private GridView gv_img;
+    private ListAdapter adapter_img;
+    private PtrClassicFrameLayout ptr;
+    private TextView tv_show_test;
+
+    private OnFragmentInteractionListener mListener;
+
+    public interface OnFragmentInteractionListener {
+        void setInDir(Boolean isInDir);
+        void setWhichDir(String dir);
+    }
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if(msg.what == 0x123){
+                String res = msg.getData().getString("res");
+                userDirPresenterImple.getFacesetDir(res);
+                adapter_dir = userDirPresenterImple.getmListViewAdapter();
+                list_dir.setAdapter(adapter_dir);
+                //adapter_dir.notifyDataSetChanged();
+
+            }else if(msg.what == 0x456){
+                String res = msg.getData().getString("res");
+                String path = msg.getData().getString("dat");
+                Log.v("refresh", "path: " + path);
+                userDirPresenterImple.getImageList(res, path);
+                adapter_img = userDirPresenterImple.getmGridViewAdapter();
+                gv_img.setAdapter(adapter_img);
+                //adapter_img.notifyAll();
+            }
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        userDirPresenterImple = new UserDirPresenterImple(this);
+        mListener.setInDir(false);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_cloud_dir, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initViews();
+        //userDirPresenterImple = new UserDirPresenterImple(this);
+        userDirPresenterImple.queryFacesetDir(dirUrl, "getdir", "null", "faceset", new MyStringCallBack(0x123, "null"));
+        //mListener.setInDir(false);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    private void initViews(){
+        list_dir = (ListView) getActivity().findViewById(R.id.list_cloud_dir);
+        tv_show_test = (TextView) getActivity().findViewById(R.id.tv_show_test);
+        gv_img = (GridView) getActivity().findViewById(R.id.gv_img);
+        ptr = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
+
+        list_dir.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                list_dir.setVisibility(View.GONE);
+                ptr.setVisibility(View.GONE);
+                gv_img.setVisibility(View.VISIBLE);
+                bean_dir = userDirPresenterImple.getmBean();
+                String path = bean_dir.get(position).getFileName();
+                mListener.setWhichDir(path);
+                userDirPresenterImple.queryFacesetDir(dirUrl, "imglist", path, "faceset", new MyStringCallBack(0x456, path));
+                mListener.setInDir(true);
+            }
+        });
+
+        ptr.setPtrHandler(new PtrDefaultHandler() {
+            @Override
+            public void onRefreshBegin(PtrFrameLayout frame) {
+                userDirPresenterImple.refreshDir("root", new MyStringCallBack(0x123, "null"));
+                ptr.refreshComplete();
+            }
+
+            @Override
+            public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
+                // 默认实现，根据实际情况做改动
+                return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
+            }
+        });
+    }
+
+    public void refreshDir(String dir){
+        Log.v("refresh", "dir: " + dir);
+        if(dir.equals("root")) {
+            userDirPresenterImple.refreshDir(dir, new MyStringCallBack(0x123, "null"));
+        }else{
+            userDirPresenterImple.refreshDir(dir, new MyStringCallBack(0x456, dir));
+        }
+    }
+
+    public void backUpperLevel(){
+        gv_img.setVisibility(View.GONE);
+        ptr.setVisibility(View.VISIBLE);
+        list_dir.setVisibility(View.VISIBLE);
+        mListener.setInDir(false);
+    }
+
+    private class MyStringCallBack extends StringCallback{
+        int mCommand;
+        String mData;
+
+        private MyStringCallBack(int command, String data){
+            mCommand = command;
+            mData = data;
+        }
+
+        @Override
+        public void onError(Call call, Exception e) {
+        }
+        @Override
+        public void onResponse(String response) {
+            Log.v("refresh", "response: " + response);
+            Bundle bundle = new Bundle();
+            bundle.putString("res", response);
+            bundle.putString("dat", mData);
+            Message msg = new Message();
+            msg.setData(bundle);
+            msg.what = mCommand;
+            handler.sendMessage(msg);
+        }
+    }
+
+}

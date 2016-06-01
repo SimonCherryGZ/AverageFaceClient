@@ -1,7 +1,6 @@
 package com.simoncherry.averagefaceclient.Fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.simoncherry.averagefaceclient.Adapter.DirectoryAdapter;
-import com.simoncherry.averagefaceclient.Module.DirectoryBean;
+import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
 import com.simoncherry.averagefaceclient.R;
 
 import java.util.ArrayList;
