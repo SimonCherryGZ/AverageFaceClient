@@ -2,7 +2,7 @@
 
 AverageFaceClient
 ===================================  
-本应用是对应AverageFaceServer的客户端。
+本应用是对应[AverageFaceServer](https://github.com/SimonCherryGZ/AverageFaceServer)的客户端。
 实现以下功能：
   1. 查看服务器上的人脸目录。
   2. 新建人脸目录，上传人脸图片。
