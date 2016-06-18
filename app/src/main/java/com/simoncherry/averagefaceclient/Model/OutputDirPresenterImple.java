@@ -33,6 +33,7 @@ public class OutputDirPresenterImple implements OutputDirPresenter {
     private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
     //private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/output/";
     private String fileUrl = "http://192.168.1.103:8128/AverageFaceServer/output/";
+    private String imagePath[];
 
     private Fragment fragment;
     private ListView mListView;
@@ -42,6 +43,11 @@ public class OutputDirPresenterImple implements OutputDirPresenter {
     private ListAdapter mGridViewAdapter;
     private PtrClassicFrameLayout mPtrCFL;
     private ImageLoader mImageLoader;
+
+
+    public String[] getImagePath() {
+        return imagePath;
+    }
 
     public OutputDirPresenterImple(Fragment fragment){
         this.fragment = fragment;
@@ -122,11 +128,9 @@ public class OutputDirPresenterImple implements OutputDirPresenter {
     public void getImageList(String reqStr, String selectDir) {
         Gson gson = new Gson();
         ImagePathBean[] arrayBean = gson.fromJson(reqStr, ImagePathBean[].class);
-        String imagePath[] = new String[arrayBean.length];
+        imagePath = new String[arrayBean.length];
         for(int i=0; i<arrayBean.length; i++){
-            // TODO "//" ?
-            imagePath[i] = fileUrl + selectDir + "//" + arrayBean[i].getImgPath();
-            //imagePath[i] = fileUrl + selectDir + "/" + arrayBean[i].getImgPath();
+            imagePath[i] = fileUrl + selectDir + "/" + arrayBean[i].getImgPath();
         }
         mGridViewAdapter = new ListImgItemAdaper(fragment.getActivity(), 0, imagePath);
     }

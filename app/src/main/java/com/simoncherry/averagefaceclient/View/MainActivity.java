@@ -24,7 +24,8 @@ import com.orhanobut.logger.Logger;
 
 import cn.jpush.android.api.JPushInterface;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+public class MainActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener,
         RapidFloatingActionContentLabelList.OnRapidFloatingActionContentLabelListListener,
         UserDirFragment.OnFragmentInteractionListener,
         OutputDirFragment.OnFragmentInteractionListener,
@@ -132,18 +133,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if(!mainPresenterImple.getFragmentTag().equals("result")) {
                 if(mainPresenterImple.getFragmentTag().equals("user")) {
                     UserDirFragment fragment = (UserDirFragment) getSupportFragmentManager().findFragmentByTag("user");
-                    fragment.backUpperLevel();
-                    fragment.refreshDir("root");
-                    setHomeAsUpBtnEnable(false);
-                    initRfab(RFAB_OUTDIR);
-                    mainPresenterImple.setWhichDir("root");
+                    // TODO
+                    if(mainPresenterImple.isViewDetail()){
+                        fragment.resumeFaceSet();
+                    }else {
+                        fragment.backUpperLevel();
+                        fragment.refreshDir("root");
+                        setHomeAsUpBtnEnable(false);
+                        initRfab(RFAB_OUTDIR);
+                        mainPresenterImple.setWhichDir("root");
+                    }
                 }else if(mainPresenterImple.getFragmentTag().equals("output")){
                     OutputDirFragment fragment = (OutputDirFragment) getSupportFragmentManager().findFragmentByTag("output");
-                    fragment.backUpperLevel();
-                    fragment.refreshDir("root");
-                    setHomeAsUpBtnEnable(false);
-                    initRfab(RFAB_OUTDIR);
-                    mainPresenterImple.setWhichDir("root");
+                    // TODO
+                    if(mainPresenterImple.isViewDetail()){
+                        fragment.resumeFaceSet();
+                    }else {
+                        fragment.backUpperLevel();
+                        fragment.refreshDir("root");
+                        setHomeAsUpBtnEnable(false);
+                        initRfab(RFAB_OUTDIR);
+                        mainPresenterImple.setWhichDir("root");
+                    }
                 }
             }else {
                 mainPresenterImple.removeFragment("result");
@@ -240,6 +251,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void setWhichDir(String dir) {
         mainPresenterImple.setWhichDir(dir);
+    }
+
+    @Override
+    public void setViewDetail(Boolean viewDetail) {
+        mainPresenterImple.setViewDetail(viewDetail);
     }
 
 }

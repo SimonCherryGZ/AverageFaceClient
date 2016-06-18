@@ -62,6 +62,8 @@ public class MainPresenterImple implements MainPresenter {
     private String fragmentTag = "user";
     private boolean isInDir = false;
     private String whichDir = "root";
+    // TODO
+    private boolean isViewDetail = false;
     final static private int RFAB_OUTDIR = 0;
     final static private int RFAB_INDIR = 1;
     final static private int RFAB_RESULT = 2;
@@ -79,6 +81,15 @@ public class MainPresenterImple implements MainPresenter {
     public MainPresenterImple(AppCompatActivity activity){
         setmActivity(activity);
         Log.v("indir", "MainPresenterImple: " + getIsInDir());
+    }
+
+    // TODO
+    public boolean isViewDetail() {
+        return isViewDetail;
+    }
+
+    public void setViewDetail(boolean viewDetail) {
+        isViewDetail = viewDetail;
     }
 
     public FragmentActivity getmActivity() {

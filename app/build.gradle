@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.3"
     defaultConfig {
         applicationId "com.simoncherry.averagefaceclient"
-        minSdkVersion 11
+        minSdkVersion 14
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -51,6 +51,7 @@ dependencies {
     compile 'com.github.wangjiegulu:AndroidBucket:1.0.4'
     compile 'com.github.wangjiegulu:ShadowViewHelper:1.0.1'
     compile 'com.github.orhanobut:logger:1.12'
-    compile 'net.steamcrafted:load-toast:1.0.10'
+    compile 'com.facebook.fresco:fresco:0.10.0'
+    compile 'me.relex:photodraweeview:1.0.0'
     //compile files('libs/nineoldandroids-2.4.0.jar')
 }

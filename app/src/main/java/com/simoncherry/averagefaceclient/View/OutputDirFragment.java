@@ -1,11 +1,11 @@
 package com.simoncherry.averagefaceclient.View;
 
 import android.content.Context;
+import android.graphics.drawable.Animatable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +15,10 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.orhanobut.logger.Logger;
 import com.simoncherry.averagefaceclient.Adapter.DirectoryAdapter;
 import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
@@ -29,6 +33,7 @@ import in.srain.cube.views.ptr.PtrDefaultHandler;
 import in.srain.cube.views.ptr.PtrFrameLayout;
 import in.srain.cube.views.ptr.header.MaterialHeader;
 import in.srain.cube.views.ptr.util.PtrLocalDisplay;
+import me.relex.photodraweeview.PhotoDraweeView;
 import okhttp3.Call;
 
 public class OutputDirFragment extends Fragment{
@@ -37,6 +42,7 @@ public class OutputDirFragment extends Fragment{
     private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
     private String currentDir = "root";
     private boolean isInDir = false;
+    private boolean isViewDetail = false;
 
     private OutputDirPresenterImple outputDirPresenterImple;
     private ListView list_dir;
@@ -47,12 +53,14 @@ public class OutputDirFragment extends Fragment{
     private PtrFrameLayout ptrFrame;
     private ImageView img_loading;
     private ViewGroup layout_container;
+    private PhotoDraweeView mPhotoDraweeView;
 
     private OnFragmentInteractionListener mListener;
 
     public interface OnFragmentInteractionListener {
         void setInDir(Boolean isInDir);
         void setWhichDir(String dir);
+        void setViewDetail(Boolean viewDetail);
     }
 
     Handler handler = new Handler() {
@@ -165,10 +173,38 @@ public class OutputDirFragment extends Fragment{
         }else if(which == 2){
             View gridview_faceset_layout = inflater.inflate(R.layout.layout_gridview_faceset, null);
             gv_img = (GridView) gridview_faceset_layout.findViewById(R.id.gridview_faceset);
+            mPhotoDraweeView = (PhotoDraweeView) gridview_faceset_layout.findViewById(R.id.mPhotoDraweeView);
             layout_container.removeAllViews();
             layout_container.addView(gridview_faceset_layout);
             img_loading = null;
             list_dir = null;
+            gv_img.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String[] imagePathSet = outputDirPresenterImple.getImagePath();
+                    String imagePath = imagePathSet[position];
+                    Logger.t("clickGridView").e(String.valueOf(position));
+                    Logger.t("getPath").e(imagePath);
+                    gv_img.setVisibility(View.GONE);
+                    mPhotoDraweeView.setVisibility(View.VISIBLE);
+                    PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
+                    controller.setUri(imagePath);
+                    controller.setOldController(mPhotoDraweeView.getController());
+                    controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
+                        @Override
+                        public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                            super.onFinalImageSet(id, imageInfo, animatable);
+                            if (imageInfo == null || mPhotoDraweeView == null) {
+                                return;
+                            }
+                            mPhotoDraweeView.update(imageInfo.getWidth(), imageInfo.getHeight());
+                        }
+                    });
+                    mPhotoDraweeView.setController(controller.build());
+                    mListener.setViewDetail(true);
+                    isViewDetail = true;
+                }
+            });
         }
 
         ptrFrame = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
@@ -205,6 +241,9 @@ public class OutputDirFragment extends Fragment{
 
             @Override
             public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
+                if(isViewDetail){
+                    return false;
+                }
                 // 默认实现，根据实际情况做改动
                 //return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
                 View view = img_loading;
@@ -236,6 +275,17 @@ public class OutputDirFragment extends Fragment{
         ptrFrame.setVisibility(View.VISIBLE);
         mListener.setInDir(false);
         isInDir = false;
+    }
+
+    public void resumeFaceSet(){
+        if(mPhotoDraweeView != null){
+            mPhotoDraweeView.setVisibility(View.GONE);
+        }
+        if(gv_img != null){
+            gv_img.setVisibility(View.VISIBLE);
+        }
+        mListener.setViewDetail(false);
+        isViewDetail = false;
     }
 
     private class MyStringCallBack extends StringCallback{

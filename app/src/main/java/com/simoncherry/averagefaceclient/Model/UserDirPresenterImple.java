@@ -12,6 +12,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.google.gson.Gson;
+import com.orhanobut.logger.Logger;
 import com.simoncherry.averagefaceclient.Adapter.DirectoryAdapter;
 import com.simoncherry.averagefaceclient.Application.MyApplication;
 import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
@@ -33,7 +34,8 @@ public class UserDirPresenterImple implements UserDirPresenter{
     private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
     //private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/faceset/";
     private String fileUrl = "http://192.168.1.103:8128/AverageFaceServer/faceset/";
-
+    // TODO
+    private String imagePath[];
 
     private Fragment fragment;
     private ListView mListView;
@@ -43,6 +45,11 @@ public class UserDirPresenterImple implements UserDirPresenter{
     private ListAdapter mGridViewAdapter;
     private PtrClassicFrameLayout mPtrCFL;
     private ImageLoader mImageLoader;
+
+    // TODO
+    public String[] getImagePath() {
+        return imagePath;
+    }
 
     public UserDirPresenterImple(Fragment fragment){
         this.fragment = fragment;
@@ -123,11 +130,13 @@ public class UserDirPresenterImple implements UserDirPresenter{
     public void getImageList(String reqStr, String selectDir) {
         Gson gson = new Gson();
         ImagePathBean[] arrayBean = gson.fromJson(reqStr, ImagePathBean[].class);
-        String imagePath[] = new String[arrayBean.length];
+        // TODO
+        //String imagePath[] = new String[arrayBean.length];
+        imagePath = new String[arrayBean.length];
         for(int i=0; i<arrayBean.length; i++){
             // TODO "//" ?
-            imagePath[i] = fileUrl + selectDir + "//" + arrayBean[i].getImgPath();
-            //imagePath[i] = fileUrl + selectDir + "/" + arrayBean[i].getImgPath();
+            //imagePath[i] = fileUrl + selectDir + "//" + arrayBean[i].getImgPath();
+            imagePath[i] = fileUrl + selectDir + "/" + arrayBean[i].getImgPath();
         }
         mGridViewAdapter = new ListImgItemAdaper(fragment.getActivity(), 0, imagePath);
     }
@@ -169,7 +178,8 @@ public class UserDirPresenterImple implements UserDirPresenter{
 
         public ListImgItemAdaper(Context context, int resource, String[] datas){
             super(fragment.getActivity(), 0, datas);
-            Log.e("TAG", "ListImgItemAdaper");
+            //Log.e("TAG", "ListImgItemAdaper");
+            Logger.e("In ListImgItemAdaper", "ok");
         }
 
         @Override

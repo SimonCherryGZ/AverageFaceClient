@@ -3,6 +3,7 @@ package com.simoncherry.averagefaceclient.Application;
 import android.app.Application;
 import android.content.Context;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.orhanobut.logger.Logger;
 
 public class MyApplication extends Application{
@@ -12,6 +13,7 @@ public class MyApplication extends Application{
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+        Fresco.initialize(this);
         Logger.init();
         Logger.t("onCreate").e("init Logger");
     }
