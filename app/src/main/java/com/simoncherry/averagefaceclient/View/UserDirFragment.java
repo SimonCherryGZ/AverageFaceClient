@@ -11,15 +11,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
+import com.orhanobut.logger.Logger;
 import com.simoncherry.averagefaceclient.Adapter.DirectoryAdapter;
 import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
 import com.simoncherry.averagefaceclient.Model.UserDirPresenterImple;
 import com.simoncherry.averagefaceclient.R;
 import com.zhy.http.okhttp.callback.StringCallback;
+
+import net.steamcrafted.loadtoast.LoadToast;
 
 import java.util.List;
 
@@ -30,7 +33,10 @@ import okhttp3.Call;
 
 public class UserDirFragment extends Fragment{
 
-    private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
+    //private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
+    private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
+    private String currentDir = "root";
+    private boolean isInDir = false;
 
     private UserDirPresenterImple userDirPresenterImple;
     private ListView list_dir;
@@ -38,8 +44,10 @@ public class UserDirFragment extends Fragment{
     private List<DirectoryBean> bean_dir;
     private GridView gv_img;
     private ListAdapter adapter_img;
-    private PtrClassicFrameLayout ptr;
-    private TextView tv_show_test;
+    private PtrClassicFrameLayout ptrFrame;
+    private ImageView img_loading;
+    private LoadToast lt;
+    private ViewGroup layout_container;
 
     private OnFragmentInteractionListener mListener;
 
@@ -51,21 +59,26 @@ public class UserDirFragment extends Fragment{
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            // TODO
             if(msg.what == 0x123){
+                initViews(1);
+
                 String res = msg.getData().getString("res");
                 userDirPresenterImple.getFacesetDir(res);
                 adapter_dir = userDirPresenterImple.getmListViewAdapter();
                 list_dir.setAdapter(adapter_dir);
-                //adapter_dir.notifyDataSetChanged();
+                ptrFrame.refreshComplete();
 
             }else if(msg.what == 0x456){
+                initViews(2);
+
                 String res = msg.getData().getString("res");
                 String path = msg.getData().getString("dat");
                 Log.v("refresh", "path: " + path);
                 userDirPresenterImple.getImageList(res, path);
                 adapter_img = userDirPresenterImple.getmGridViewAdapter();
                 gv_img.setAdapter(adapter_img);
-                //adapter_img.notifyAll();
+                ptrFrame.refreshComplete();
             }
         }
     };
@@ -75,21 +88,52 @@ public class UserDirFragment extends Fragment{
         super.onCreate(savedInstanceState);
         userDirPresenterImple = new UserDirPresenterImple(this);
         mListener.setInDir(false);
+        isInDir = false;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_cloud_dir, container, false);
+        //return inflater.inflate(R.layout.fragment_cloud_dir, container, false);
+        // TODO
+        View view = inflater.inflate(R.layout.fragment_cloud_dir, container, false);
+        layout_container = (ViewGroup) view.findViewById(R.id.layout_container);
+        ptrFrame = (PtrClassicFrameLayout) view.findViewById(R.id.ptr_frame);
+//        ptrFrame.setPtrHandler(new PtrDefaultHandler() {
+//            @Override
+//            public void onRefreshBegin(PtrFrameLayout frame) {
+//                userDirPresenterImple.refreshDir("root", new MyStringCallBack(0x123, "null"));
+//                //ptrFrame.refreshComplete();
+//                // TODO
+//                if(img_loading != null) {
+//                    img_loading.setImageResource(R.drawable.loading_wait);
+//                    img_loading.setVisibility(View.VISIBLE);
+//                }
+//            }
+//
+//            @Override
+//            public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
+//                // 默认实现，根据实际情况做改动
+//                //return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
+//                View view = img_loading;
+//                if(img_loading != null){
+//                    view = img_loading;
+//                }else if(list_dir != null){
+//                    view = list_dir;
+//                }else if(gv_img != null){
+//                    view = gv_img;
+//                }
+//                return PtrDefaultHandler.checkContentCanBePulledDown(frame, view, header);
+//            }
+//        });
+        return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        initViews();
-        //userDirPresenterImple = new UserDirPresenterImple(this);
+        initViews(0);  // TODO
         userDirPresenterImple.queryFacesetDir(dirUrl, "getdir", "null", "faceset", new MyStringCallBack(0x123, "null"));
-        //mListener.setInDir(false);
     }
 
     @Override
@@ -109,43 +153,107 @@ public class UserDirFragment extends Fragment{
         mListener = null;
     }
 
-    private void initViews(){
-        list_dir = (ListView) getActivity().findViewById(R.id.list_cloud_dir);
-        tv_show_test = (TextView) getActivity().findViewById(R.id.tv_show_test);
-        gv_img = (GridView) getActivity().findViewById(R.id.gv_img);
-        ptr = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
+    private void initViews(final int which){
+//        list_dir = (ListView) getActivity().findViewById(R.id.list_cloud_dir);
+//        img_loading = (ImageView) getActivity().findViewById(R.id.img_loading);
+//        gv_img = (GridView) getActivity().findViewById(R.id.gv_img);
+//        ptrFrame = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
+//
+//        list_dir.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                list_dir.setVisibility(View.GONE);
+//                ptrFrame.setVisibility(View.GONE);
+//                gv_img.setVisibility(View.VISIBLE);
+//                bean_dir = userDirPresenterImple.getmBean();
+//                String path = bean_dir.get(position).getFileName();
+//                mListener.setWhichDir(path);
+//                userDirPresenterImple.queryFacesetDir(dirUrl, "imglist", path, "faceset", new MyStringCallBack(0x456, path));
+//                mListener.setInDir(true);
+//            }
+//        });
+//
+//        img_loading.setVisibility(View.VISIBLE);
 
-        list_dir.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                list_dir.setVisibility(View.GONE);
-                ptr.setVisibility(View.GONE);
-                gv_img.setVisibility(View.VISIBLE);
-                bean_dir = userDirPresenterImple.getmBean();
-                String path = bean_dir.get(position).getFileName();
-                mListener.setWhichDir(path);
-                userDirPresenterImple.queryFacesetDir(dirUrl, "imglist", path, "faceset", new MyStringCallBack(0x456, path));
-                mListener.setInDir(true);
-            }
-        });
+        final LayoutInflater inflater = LayoutInflater.from(getActivity());
 
-        ptr.setPtrHandler(new PtrDefaultHandler() {
+        if(which == 0) {
+            View img_loading_layout = inflater.inflate(R.layout.img_loading_layout, null);
+            img_loading = (ImageView) img_loading_layout.findViewById(R.id.img_loading);
+            layout_container.removeAllViews();
+            layout_container.addView(img_loading_layout);
+            list_dir = null;
+            gv_img = null;
+        }else if(which == 1){
+            View listview_faceset_layout = inflater.inflate(R.layout.listview_faceset_layout, null);
+            list_dir = (ListView) listview_faceset_layout.findViewById(R.id.listview_faceset);
+            layout_container.removeAllViews();
+            layout_container.addView(listview_faceset_layout);
+            img_loading = null;
+            gv_img = null;
+            list_dir.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    // TODO
+                    //ptrFrame.setVisibility(View.GONE);
+                    //list_dir.setVisibility(View.GONE);
+                    //gv_img.setVisibility(View.VISIBLE);
+                    bean_dir = userDirPresenterImple.getmBean();
+                    String path = bean_dir.get(position).getFileName();
+                    // TODO
+                    isInDir = true;
+                    currentDir = path;
+                    mListener.setWhichDir(path);
+                    mListener.setInDir(true);
+                    userDirPresenterImple.queryFacesetDir(dirUrl, "imglist", path, "faceset", new MyStringCallBack(0x456, path));
+                }
+            });
+        }else if(which == 2){
+            View gridview_faceset_layout = inflater.inflate(R.layout.gridview_faceset_layout, null);
+            gv_img = (GridView) gridview_faceset_layout.findViewById(R.id.gridview_faceset);
+            layout_container.removeAllViews();
+            layout_container.addView(gridview_faceset_layout);
+            img_loading = null;
+            list_dir = null;
+        }
+
+        //ptrFrame = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
+        ptrFrame.setPtrHandler(new PtrDefaultHandler() {
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
-                userDirPresenterImple.refreshDir("root", new MyStringCallBack(0x123, "null"));
-                ptr.refreshComplete();
+                // TODO
+                if(isInDir) {
+                    userDirPresenterImple.refreshDir(currentDir, new MyStringCallBack(0x456, currentDir));
+                }else {
+                    userDirPresenterImple.refreshDir("root", new MyStringCallBack(0x123, "null"));
+                }
+                // TODO
+                if(img_loading != null) {
+                    img_loading.setImageResource(R.drawable.loading_wait);
+                    img_loading.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
             public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
                 // 默认实现，根据实际情况做改动
-                return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
+                //return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
+                View view = img_loading;
+                if(img_loading != null){
+                    view = img_loading;
+                }else if(list_dir != null){
+                    view = list_dir;
+                }else if(gv_img != null){
+                    view = gv_img;
+                }
+                return PtrDefaultHandler.checkContentCanBePulledDown(frame, view, header);
             }
         });
     }
 
     public void refreshDir(String dir){
-        Log.v("refresh", "dir: " + dir);
+        Logger.t("Refresh").e("Directory: " + dir);
+
         if(dir.equals("root")) {
             userDirPresenterImple.refreshDir(dir, new MyStringCallBack(0x123, "null"));
         }else{
@@ -154,10 +262,12 @@ public class UserDirFragment extends Fragment{
     }
 
     public void backUpperLevel(){
-        gv_img.setVisibility(View.GONE);
-        ptr.setVisibility(View.VISIBLE);
-        list_dir.setVisibility(View.VISIBLE);
+        // TODO
+//        gv_img.setVisibility(View.GONE);
+//        list_dir.setVisibility(View.VISIBLE);
+        ptrFrame.setVisibility(View.VISIBLE);
         mListener.setInDir(false);
+        isInDir = false;
     }
 
     private class MyStringCallBack extends StringCallback{
@@ -171,10 +281,30 @@ public class UserDirFragment extends Fragment{
 
         @Override
         public void onError(Call call, Exception e) {
+            Logger.t("onError").e(e.getMessage());
+            //img_loading.setImageResource(R.drawable.loading_failed);
+            //img_loading.setVisibility(View.VISIBLE);
+            // TODO
+            if(img_loading == null){
+//                final LayoutInflater inflater = LayoutInflater.from(getActivity());
+//                ViewGroup img_loading_layout = (ViewGroup) inflater.inflate(R.layout.img_loading_layout, null);
+//                img_loading = (ImageView) img_loading_layout.findViewById(R.id.img_loading);
+//                layout_container.removeAllViews();
+//                layout_container.addView(img_loading_layout);
+                initViews(0);
+            }
+
+            img_loading.setImageResource(R.drawable.loading_failed);
+            img_loading.setVisibility(View.VISIBLE);
+
+            ptrFrame.refreshComplete();
         }
         @Override
         public void onResponse(String response) {
-            Log.v("refresh", "response: " + response);
+            Logger.t("onResponse").e(response);
+            //img_loading.setVisibility(View.GONE);
+            // TODO
+
             Bundle bundle = new Bundle();
             bundle.putString("res", response);
             bundle.putString("dat", mData);

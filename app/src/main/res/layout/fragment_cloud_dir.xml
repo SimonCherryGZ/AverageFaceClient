@@ -2,11 +2,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragment.CloudDirFragment">
+    tools:context=".View.UserDirFragment">
+
+    <!--<ImageView
+        android:id="@+id/img_loading"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/loading_wait"/>
 
     <include
         android:id="@+id/gv_img"
-        layout="@layout/fragment_download_img" />
+        layout="@layout/fragment_download_img" />-->
 
     <in.srain.cube.views.ptr.PtrClassicFrameLayout
         android:id="@+id/ptr_frame"
@@ -21,26 +28,20 @@
         cube_ptr:ptr_keep_header_when_refresh="true"
         cube_ptr:ptr_pull_to_fresh="false" >
 
-        <ListView
+        <!--<ListView
             android:id="@+id/list_cloud_dir"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="0dp"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="0dp"></ListView>
+            android:layout_marginTop="0dp"></ListView>-->
+
+        <FrameLayout
+            android:id="@+id/layout_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </in.srain.cube.views.ptr.PtrClassicFrameLayout>
-
-    <TextView
-        android:id="@+id/tv_show_test"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="0dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="0dp"
-        android:text=""
-        android:visibility="invisible"/>
 
 </RelativeLayout>

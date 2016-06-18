@@ -13,12 +13,12 @@ import android.widget.ListView;
 
 import com.google.gson.Gson;
 import com.simoncherry.averagefaceclient.Adapter.DirectoryAdapter;
+import com.simoncherry.averagefaceclient.Application.MyApplication;
 import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
 import com.simoncherry.averagefaceclient.Bean.ImagePathBean;
 import com.simoncherry.averagefaceclient.Presenter.UserDirPresenter;
 import com.simoncherry.averagefaceclient.R;
 import com.simoncherry.averagefaceclient.Util.ImageLoader;
-import com.simoncherry.averagefaceclient.Util.MyApplication;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
@@ -29,8 +29,11 @@ import in.srain.cube.views.ptr.PtrClassicFrameLayout;
 
 public class UserDirPresenterImple implements UserDirPresenter{
 
-    private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
-    private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/faceset/";
+    //private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
+    private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
+    //private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/faceset/";
+    private String fileUrl = "http://192.168.1.103:8128/AverageFaceServer/faceset/";
+
 
     private Fragment fragment;
     private ListView mListView;

@@ -30,7 +30,8 @@ import okhttp3.Call;
 
 public class OutputDirFragment extends Fragment{
 
-    private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
+    //private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
+    private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
 
     private OutputDirPresenterImple outputDirPresenterImple;
     private ListView list_dir;
@@ -39,7 +40,6 @@ public class OutputDirFragment extends Fragment{
     private GridView gv_img;
     private ListAdapter adapter_img;
     private PtrClassicFrameLayout ptr;
-    private TextView tv_show_test;
 
     private OnFragmentInteractionListener mListener;
 
@@ -110,9 +110,8 @@ public class OutputDirFragment extends Fragment{
     }
 
     private void initViews(){
-        list_dir = (ListView) getActivity().findViewById(R.id.list_cloud_dir);
-        tv_show_test = (TextView) getActivity().findViewById(R.id.tv_show_test);
-        gv_img = (GridView) getActivity().findViewById(R.id.gv_img);
+        //list_dir = (ListView) getActivity().findViewById(R.id.list_cloud_dir);
+        //gv_img = (GridView) getActivity().findViewById(R.id.gv_img);
         ptr = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
 
         list_dir.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -6,8 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.simoncherry.averagefaceclient.Activity.UserActivity;
-import com.simoncherry.averagefaceclient.Fragment.ResultFragment;
+import com.simoncherry.averagefaceclient.View.MainActivity;
 import com.simoncherry.averagefaceclient.View.MergeResultFragment;
 
 import org.json.JSONException;
@@ -50,7 +49,7 @@ public class MyReceiver extends BroadcastReceiver {
             Log.d(TAG, "[MyReceiver] 用户点击打开了通知");
             
         	//打开自定义的Activity
-        	Intent i = new Intent(context, UserActivity.class);
+        	Intent i = new Intent(context, MainActivity.class);
         	i.putExtras(bundle);
         	//i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP );

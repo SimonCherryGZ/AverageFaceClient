@@ -18,7 +18,7 @@ import com.simoncherry.averagefaceclient.Bean.ImagePathBean;
 import com.simoncherry.averagefaceclient.Presenter.OutputDirPresenter;
 import com.simoncherry.averagefaceclient.R;
 import com.simoncherry.averagefaceclient.Util.ImageLoader;
-import com.simoncherry.averagefaceclient.Util.MyApplication;
+import com.simoncherry.averagefaceclient.Application.MyApplication;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
@@ -29,8 +29,10 @@ import in.srain.cube.views.ptr.PtrClassicFrameLayout;
 
 public class OutputDirPresenterImple implements OutputDirPresenter {
 
-    private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
-    private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/output/";
+    //private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
+    private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
+    //private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/output/";
+    private String fileUrl = "http://192.168.1.103:8128/AverageFaceServer/output/";
 
     private Fragment fragment;
     private ListView mListView;

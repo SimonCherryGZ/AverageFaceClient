@@ -24,7 +24,8 @@ public class MergeResultFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     // ============================================================================================
-    private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/";
+    //private String fileUrl = "http://192.168.1.102:8128/AverageFaceServer/";
+    private String fileUrl = "http://192.168.1.103:8128/AverageFaceServer/";
 
     private TextView tv_process_msg;
     private ImageView img_result;

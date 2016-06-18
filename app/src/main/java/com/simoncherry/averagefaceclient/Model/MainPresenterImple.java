@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.simoncherry.averagefaceclient.Presenter.MainPresenter;
 import com.simoncherry.averagefaceclient.R;
-import com.simoncherry.averagefaceclient.Util.MyApplication;
+import com.simoncherry.averagefaceclient.Application.MyApplication;
 import com.simoncherry.averagefaceclient.View.MergeResultFragment;
 import com.simoncherry.averagefaceclient.View.UserDirFragment;
 import com.simoncherry.averagefaceclient.View.OutputDirFragment;
@@ -51,9 +51,14 @@ import okhttp3.Response;
 
 public class MainPresenterImple implements MainPresenter {
 
-    private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
-    private String uploadUrl = "http://192.168.1.102:8128/AverageFaceServer/UploadFileServlet";
-    private String mergeUrl = "http://192.168.1.102:8128/AverageFaceServer/MergeFaceServlet";
+    //private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
+    private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
+    //private String uploadUrl = "http://192.168.1.102:8128/AverageFaceServer/UploadFileServlet";
+    private String uploadUrl = "http://192.168.1.103:8128/AverageFaceServer/UploadFileServlet";
+    //private String mergeUrl = "http://192.168.1.102:8128/AverageFaceServer/MergeFaceServlet";
+    private String mergeUrl = "http://192.168.1.103:8128/AverageFaceServer/MergeFaceServlet";
+
+
     private String fragmentTag = "user";
     private boolean isInDir = false;
     private String whichDir = "root";
