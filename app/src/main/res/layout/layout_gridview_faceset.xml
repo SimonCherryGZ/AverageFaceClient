@@ -7,6 +7,7 @@
     android:horizontalSpacing="3dp"
     android:verticalSpacing="3dp"
     android:numColumns="3"
+    android:background="@color/colorBackgroundWhite"
     >
 
 </GridView>

@@ -46,7 +46,7 @@ public class DirectoryAdapter extends BaseAdapter{
         final ViewHolder holder;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.layout_dir_item, null);
+            convertView = inflater.inflate(R.layout.item_faceset_dir, null);
             holder = new ViewHolder();
             holder.img_icon = (ImageView) convertView.findViewById(R.id.img_icon);
             holder.tv_name = (TextView) convertView.findViewById(R.id.tv_name);

@@ -11,10 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
+import com.orhanobut.logger.Logger;
 import com.simoncherry.averagefaceclient.Adapter.DirectoryAdapter;
 import com.simoncherry.averagefaceclient.Bean.DirectoryBean;
 import com.simoncherry.averagefaceclient.Model.OutputDirPresenterImple;
@@ -26,12 +27,16 @@ import java.util.List;
 import in.srain.cube.views.ptr.PtrClassicFrameLayout;
 import in.srain.cube.views.ptr.PtrDefaultHandler;
 import in.srain.cube.views.ptr.PtrFrameLayout;
+import in.srain.cube.views.ptr.header.MaterialHeader;
+import in.srain.cube.views.ptr.util.PtrLocalDisplay;
 import okhttp3.Call;
 
 public class OutputDirFragment extends Fragment{
 
     //private String dirUrl = "http://192.168.1.102:8128/AverageFaceServer/DirectoryServlet";
     private String dirUrl = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
+    private String currentDir = "root";
+    private boolean isInDir = false;
 
     private OutputDirPresenterImple outputDirPresenterImple;
     private ListView list_dir;
@@ -39,7 +44,9 @@ public class OutputDirFragment extends Fragment{
     private List<DirectoryBean> bean_dir;
     private GridView gv_img;
     private ListAdapter adapter_img;
-    private PtrClassicFrameLayout ptr;
+    private PtrFrameLayout ptrFrame;
+    private ImageView img_loading;
+    private ViewGroup layout_container;
 
     private OnFragmentInteractionListener mListener;
 
@@ -52,20 +59,24 @@ public class OutputDirFragment extends Fragment{
         @Override
         public void handleMessage(Message msg) {
             if(msg.what == 0x123){
+                initViews(1);
+
                 String res = msg.getData().getString("res");
                 outputDirPresenterImple.getFacesetDir(res);
                 adapter_dir = outputDirPresenterImple.getmListViewAdapter();
                 list_dir.setAdapter(adapter_dir);
-                //adapter_dir.notifyDataSetChanged();
+                ptrFrame.refreshComplete();
 
             }else if(msg.what == 0x456){
+                initViews(2);
+
                 String res = msg.getData().getString("res");
                 String path = msg.getData().getString("dat");
-                Log.v("refresh", "path: " + path);
+                Logger.e("handler 0x456 refresh path", path);
                 outputDirPresenterImple.getImageList(res, path);
                 adapter_img = outputDirPresenterImple.getmGridViewAdapter();
                 gv_img.setAdapter(adapter_img);
-                //adapter_img.notifyAll();
+                ptrFrame.refreshComplete();
             }
         }
     };
@@ -75,21 +86,33 @@ public class OutputDirFragment extends Fragment{
         super.onCreate(savedInstanceState);
         outputDirPresenterImple = new OutputDirPresenterImple(this);
         mListener.setInDir(false);
+        isInDir = false;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_cloud_dir, container, false);
+        //return inflater.inflate(R.layout.fragment_cloud_dir, container, false);
+        View view = inflater.inflate(R.layout.fragment_cloud_dir, container, false);
+        layout_container = (ViewGroup) view.findViewById(R.id.layout_container);
+        ptrFrame = (PtrFrameLayout) view.findViewById(R.id.ptr_frame);
+        final MaterialHeader header = new MaterialHeader(getContext());
+        int[] colors = getResources().getIntArray(R.array.google_colors);
+        header.setColorSchemeColors(colors);
+        header.setLayoutParams(new PtrFrameLayout.LayoutParams(-1, -2));
+        header.setPadding(0, PtrLocalDisplay.dp2px(15), 0, PtrLocalDisplay.dp2px(10));
+        header.setPtrFrameLayout(ptrFrame);
+        ptrFrame.setHeaderView(header);
+        ptrFrame.addPtrUIHandler(header);
+
+        return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        initViews();
-        //outputDirPresenterImple = new UserDirPresenterImple(this);
+        initViews(0);
         outputDirPresenterImple.queryFacesetDir(dirUrl, "getdir", "null", "output", new MyStringCallBack(0x123, "null"));
-        //mListener.setInDir(false);
     }
 
     @Override
@@ -109,42 +132,97 @@ public class OutputDirFragment extends Fragment{
         mListener = null;
     }
 
-    private void initViews(){
+    private void initViews(final int which){
         //list_dir = (ListView) getActivity().findViewById(R.id.list_cloud_dir);
         //gv_img = (GridView) getActivity().findViewById(R.id.gv_img);
-        ptr = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
+        final LayoutInflater inflater = LayoutInflater.from(getActivity());
+        if(which == 0) {
+            View img_loading_layout = inflater.inflate(R.layout.layout_img_loading, null);
+            img_loading = (ImageView) img_loading_layout.findViewById(R.id.img_loading);
+            layout_container.removeAllViews();
+            layout_container.addView(img_loading_layout);
+            list_dir = null;
+            gv_img = null;
+        }else if(which == 1){
+            View listview_faceset_layout = inflater.inflate(R.layout.layout_listview_faceset, null);
+            list_dir = (ListView) listview_faceset_layout.findViewById(R.id.listview_faceset);
+            layout_container.removeAllViews();
+            layout_container.addView(listview_faceset_layout);
+            img_loading = null;
+            gv_img = null;
+            list_dir.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    bean_dir = outputDirPresenterImple.getmBean();
+                    String path = bean_dir.get(position).getFileName();
+                    isInDir = true;
+                    currentDir = path;
+                    mListener.setWhichDir(path);
+                    mListener.setInDir(true);
+                    outputDirPresenterImple.queryFacesetDir(dirUrl, "imglist", path, "output", new MyStringCallBack(0x456, path));
+                }
+            });
+        }else if(which == 2){
+            View gridview_faceset_layout = inflater.inflate(R.layout.layout_gridview_faceset, null);
+            gv_img = (GridView) gridview_faceset_layout.findViewById(R.id.gridview_faceset);
+            layout_container.removeAllViews();
+            layout_container.addView(gridview_faceset_layout);
+            img_loading = null;
+            list_dir = null;
+        }
 
-        list_dir.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                list_dir.setVisibility(View.GONE);
-                ptr.setVisibility(View.GONE);
-                gv_img.setVisibility(View.VISIBLE);
-                bean_dir = outputDirPresenterImple.getmBean();
-                String path = bean_dir.get(position).getFileName();
-                mListener.setWhichDir(path);
-                outputDirPresenterImple.queryFacesetDir(dirUrl, "imglist", path, "output", new MyStringCallBack(0x456, path));
-                mListener.setInDir(true);
-            }
-        });
+        ptrFrame = (PtrClassicFrameLayout) getActivity().findViewById(R.id.ptr_frame);
 
-        ptr.setPtrHandler(new PtrDefaultHandler() {
+//        list_dir.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                list_dir.setVisibility(View.GONE);
+//                ptrFrame.setVisibility(View.GONE);
+//                gv_img.setVisibility(View.VISIBLE);
+//                bean_dir = outputDirPresenterImple.getmBean();
+//                String path = bean_dir.get(position).getFileName();
+//                mListener.setWhichDir(path);
+//                outputDirPresenterImple.queryFacesetDir(dirUrl, "imglist", path, "output", new MyStringCallBack(0x456, path));
+//                mListener.setInDir(true);
+//            }
+//        });
+
+        ptrFrame.setPtrHandler(new PtrDefaultHandler() {
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
-                outputDirPresenterImple.refreshDir("root", new MyStringCallBack(0x123, "null"));
-                ptr.refreshComplete();
+                //outputDirPresenterImple.refreshDir("root", new MyStringCallBack(0x123, "null"));
+                if(isInDir) {
+                    outputDirPresenterImple.queryFacesetDir(dirUrl, "imglist", currentDir, "output", new MyStringCallBack(0x456, currentDir));
+                }else {
+                    outputDirPresenterImple.refreshDir("root", new MyStringCallBack(0x123, "null"));
+                }
+                if(img_loading != null) {
+                    img_loading.setImageResource(R.drawable.loading_wait);
+                    img_loading.setVisibility(View.VISIBLE);
+                }
+                //ptrFrame.refreshComplete();
             }
 
             @Override
             public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
                 // 默认实现，根据实际情况做改动
-                return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
+                //return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
+                View view = img_loading;
+                if(img_loading != null){
+                    view = img_loading;
+                }else if(list_dir != null){
+                    view = list_dir;
+                }else if(gv_img != null){
+                    view = gv_img;
+                }
+                return PtrDefaultHandler.checkContentCanBePulledDown(frame, view, header);
             }
         });
     }
 
     public void refreshDir(String dir){
-        Log.v("refresh", "dir: " + dir);
+        Logger.t("Refresh").e("Directory: " + dir);
+
         if(dir.equals("root")) {
             outputDirPresenterImple.refreshDir(dir, new MyStringCallBack(0x123, "null"));
         }else{
@@ -153,10 +231,11 @@ public class OutputDirFragment extends Fragment{
     }
 
     public void backUpperLevel(){
-        gv_img.setVisibility(View.GONE);
-        ptr.setVisibility(View.VISIBLE);
-        list_dir.setVisibility(View.VISIBLE);
+        //gv_img.setVisibility(View.GONE);
+        //list_dir.setVisibility(View.VISIBLE);
+        ptrFrame.setVisibility(View.VISIBLE);
         mListener.setInDir(false);
+        isInDir = false;
     }
 
     private class MyStringCallBack extends StringCallback{
@@ -170,10 +249,19 @@ public class OutputDirFragment extends Fragment{
 
         @Override
         public void onError(Call call, Exception e) {
+            Logger.t("onError").e(e.getMessage());
+            if(img_loading == null){
+                initViews(0);
+            }
+            img_loading.setImageResource(R.drawable.loading_failed);
+            img_loading.setVisibility(View.VISIBLE);
+
+            ptrFrame.refreshComplete();
         }
         @Override
         public void onResponse(String response) {
-            Log.v("refresh", "response: " + response);
+            Logger.t("onResponse").e(response);
+
             Bundle bundle = new Bundle();
             bundle.putString("res", response);
             bundle.putString("dat", mData);

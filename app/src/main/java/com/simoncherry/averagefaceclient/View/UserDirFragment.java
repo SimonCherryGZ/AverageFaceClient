@@ -29,6 +29,8 @@ import java.util.List;
 import in.srain.cube.views.ptr.PtrClassicFrameLayout;
 import in.srain.cube.views.ptr.PtrDefaultHandler;
 import in.srain.cube.views.ptr.PtrFrameLayout;
+import in.srain.cube.views.ptr.header.MaterialHeader;
+import in.srain.cube.views.ptr.util.PtrLocalDisplay;
 import okhttp3.Call;
 
 public class UserDirFragment extends Fragment{
@@ -44,7 +46,7 @@ public class UserDirFragment extends Fragment{
     private List<DirectoryBean> bean_dir;
     private GridView gv_img;
     private ListAdapter adapter_img;
-    private PtrClassicFrameLayout ptrFrame;
+    private PtrFrameLayout ptrFrame;
     private ImageView img_loading;
     private LoadToast lt;
     private ViewGroup layout_container;
@@ -74,7 +76,7 @@ public class UserDirFragment extends Fragment{
 
                 String res = msg.getData().getString("res");
                 String path = msg.getData().getString("dat");
-                Log.v("refresh", "path: " + path);
+                Logger.e("handler 0x456 refresh path", path);
                 userDirPresenterImple.getImageList(res, path);
                 adapter_img = userDirPresenterImple.getmGridViewAdapter();
                 gv_img.setAdapter(adapter_img);
@@ -98,7 +100,7 @@ public class UserDirFragment extends Fragment{
         // TODO
         View view = inflater.inflate(R.layout.fragment_cloud_dir, container, false);
         layout_container = (ViewGroup) view.findViewById(R.id.layout_container);
-        ptrFrame = (PtrClassicFrameLayout) view.findViewById(R.id.ptr_frame);
+        ptrFrame = (PtrFrameLayout) view.findViewById(R.id.ptr_frame);
 //        ptrFrame.setPtrHandler(new PtrDefaultHandler() {
 //            @Override
 //            public void onRefreshBegin(PtrFrameLayout frame) {
@@ -126,6 +128,16 @@ public class UserDirFragment extends Fragment{
 //                return PtrDefaultHandler.checkContentCanBePulledDown(frame, view, header);
 //            }
 //        });
+        // header
+        final MaterialHeader header = new MaterialHeader(getContext());
+        int[] colors = getResources().getIntArray(R.array.google_colors);
+        header.setColorSchemeColors(colors);
+        header.setLayoutParams(new PtrFrameLayout.LayoutParams(-1, -2));
+        header.setPadding(0, PtrLocalDisplay.dp2px(15), 0, PtrLocalDisplay.dp2px(10));
+        header.setPtrFrameLayout(ptrFrame);
+        ptrFrame.setHeaderView(header);
+        ptrFrame.addPtrUIHandler(header);
+
         return view;
     }
 
@@ -178,14 +190,14 @@ public class UserDirFragment extends Fragment{
         final LayoutInflater inflater = LayoutInflater.from(getActivity());
 
         if(which == 0) {
-            View img_loading_layout = inflater.inflate(R.layout.img_loading_layout, null);
+            View img_loading_layout = inflater.inflate(R.layout.layout_img_loading, null);
             img_loading = (ImageView) img_loading_layout.findViewById(R.id.img_loading);
             layout_container.removeAllViews();
             layout_container.addView(img_loading_layout);
             list_dir = null;
             gv_img = null;
         }else if(which == 1){
-            View listview_faceset_layout = inflater.inflate(R.layout.listview_faceset_layout, null);
+            View listview_faceset_layout = inflater.inflate(R.layout.layout_listview_faceset, null);
             list_dir = (ListView) listview_faceset_layout.findViewById(R.id.listview_faceset);
             layout_container.removeAllViews();
             layout_container.addView(listview_faceset_layout);
@@ -209,7 +221,7 @@ public class UserDirFragment extends Fragment{
                 }
             });
         }else if(which == 2){
-            View gridview_faceset_layout = inflater.inflate(R.layout.gridview_faceset_layout, null);
+            View gridview_faceset_layout = inflater.inflate(R.layout.layout_gridview_faceset, null);
             gv_img = (GridView) gridview_faceset_layout.findViewById(R.id.gridview_faceset);
             layout_container.removeAllViews();
             layout_container.addView(gridview_faceset_layout);
@@ -287,10 +299,10 @@ public class UserDirFragment extends Fragment{
             // TODO
             if(img_loading == null){
 //                final LayoutInflater inflater = LayoutInflater.from(getActivity());
-//                ViewGroup img_loading_layout = (ViewGroup) inflater.inflate(R.layout.img_loading_layout, null);
-//                img_loading = (ImageView) img_loading_layout.findViewById(R.id.img_loading);
+//                ViewGroup layout_img_loading = (ViewGroup) inflater.inflate(R.layout.layout_img_loading, null);
+//                img_loading = (ImageView) layout_img_loading.findViewById(R.id.img_loading);
 //                layout_container.removeAllViews();
-//                layout_container.addView(img_loading_layout);
+//                layout_container.addView(layout_img_loading);
                 initViews(0);
             }
 

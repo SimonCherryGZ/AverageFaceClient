@@ -18,7 +18,8 @@
         android:layout_toRightOf="@+id/img_icon"
         android:text="Directory of average face test"
         android:textSize="16sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimaryText"/>
 
     <TextView
         android:id="@+id/tv_date"
@@ -26,7 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/tv_name"
         android:layout_alignBottom="@+id/img_icon"
-        android:text="2016-05-13 11:43:47"/>
+        android:text="2016-05-13 11:43:47"
+        android:textColor="@color/colorSecondaryText"/>
 
     <TextView
         android:id="@+id/tv_count"
@@ -36,6 +38,7 @@
         android:layout_alignBottom="@+id/tv_date"
         android:layout_marginRight="10dp"
         android:text="文件数量：246"
+        android:textColor="@color/colorSecondaryText"
         android:gravity="end"/>
 
 </RelativeLayout>
