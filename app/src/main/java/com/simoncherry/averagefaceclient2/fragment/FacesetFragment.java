@@ -51,6 +51,8 @@ public class FacesetFragment extends Fragment implements FacesetView{
     private ImageLoader mImageLoader;
 
     private OnFragmentInteractionListener mListener;
+    private boolean isInDirectory = false;
+    private String currentDirectory = "";
 
 
     public interface OnFragmentInteractionListener {
@@ -71,6 +73,14 @@ public class FacesetFragment extends Fragment implements FacesetView{
         return this.mPhotoDraweeView;
     }
 
+    public boolean isInDirectory() {
+        return isInDirectory;
+    }
+
+    public void setInDirectory(boolean inDirectory) {
+        isInDirectory = inDirectory;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,7 +98,12 @@ public class FacesetFragment extends Fragment implements FacesetView{
         ptrFrame.setPtrHandler(new PtrDefaultHandler() {
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
-                presenter.getFacesetDirectory();
+                if(isInDirectory){
+                    presenter.getFacesetPhoto(currentDirectory);
+                }else{
+                    presenter.getFacesetDirectory();
+                }
+
                 if(img_loading != null) {
                     img_loading.setImageResource(R.drawable.loading_wait);
                     img_loading.setVisibility(View.VISIBLE);
@@ -96,6 +111,10 @@ public class FacesetFragment extends Fragment implements FacesetView{
             }
             @Override
             public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
+                if(null != mPhotoDraweeView && mPhotoDraweeView.getVisibility() == View.VISIBLE){
+                    return false;
+                }
+
                 View view = img_loading;
                 if(img_loading != null){
                     view = img_loading;
@@ -158,6 +177,8 @@ public class FacesetFragment extends Fragment implements FacesetView{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String path = presenter.getDirectoryBean().get(position).getFileName();
+                currentDirectory = path;
+                isInDirectory = true;
                 presenter.getFacesetPhoto(path);
                 mListener.setInDiretory(true);
             }
@@ -182,8 +203,8 @@ public class FacesetFragment extends Fragment implements FacesetView{
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String[] imagePathSet = presenter.getImagePath();
                 String imagePath = imagePathSet[position];
-                Logger.t("clickGridView").e(String.valueOf(position));
-                Logger.t("getPath").e(imagePath);
+                //Logger.t("clickGridView").e(String.valueOf(position));
+                //Logger.t("getPath").e(imagePath);
                 gv_img.setVisibility(View.GONE);
                 mPhotoDraweeView.setVisibility(View.VISIBLE);
                 PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();

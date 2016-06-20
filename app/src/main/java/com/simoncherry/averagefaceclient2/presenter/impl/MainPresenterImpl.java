@@ -69,6 +69,7 @@ public class MainPresenterImpl implements MainPresenter{
             facesetFragment.resumeFaceSet();
             return false;
         }else {
+            facesetFragment.setInDirectory(false);
             facesetFragment.getPresenter().getFacesetDirectory();
             return true;
         }
