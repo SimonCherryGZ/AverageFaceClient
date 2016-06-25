@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -23,7 +24,9 @@ import com.orhanobut.logger.Logger;
 import com.simoncherry.averagefaceclient2.R;
 import com.simoncherry.averagefaceclient2.adapter.DirectoryAdapter;
 import com.simoncherry.averagefaceclient2.application.MyApplication;
+import com.simoncherry.averagefaceclient2.base.GridScrollStateBean;
 import com.simoncherry.averagefaceclient2.base.LayerBean;
+import com.simoncherry.averagefaceclient2.base.ListScrollStateBean;
 import com.simoncherry.averagefaceclient2.bean.DirectoryBean;
 import com.simoncherry.averagefaceclient2.event.onChangeDirectoryEvent;
 import com.simoncherry.averagefaceclient2.event.onRefreshEvent;
@@ -63,6 +66,8 @@ public class FacesetFragment extends Fragment implements FacesetView{
     private String currentDirectory = "";
     // TODO
     private String type = MyApplication.TAG_FACESET;
+    private int scrolledX = 0;
+    private int scrolledY = 0;
     //
 
 
@@ -122,12 +127,17 @@ public class FacesetFragment extends Fragment implements FacesetView{
         ptrFrame.setPtrHandler(new PtrDefaultHandler() {
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
-                if(isInDirectory){
-                    // TODO
-                    //presenter.getFacesetPhoto(currentDirectory);
-                    presenter.getFacesetPhoto(LayerBean.getDirectory());
-                }else{
+//                if(isInDirectory){
+//                    // TODO
+//                    //presenter.getFacesetPhoto(currentDirectory);
+//                    presenter.getFacesetPhoto(LayerBean.getDirectory());
+//                }else{
+//                    presenter.getFacesetDirectory();
+//                }
+                if(LayerBean.getLayer() == 0){
                     presenter.getFacesetDirectory();
+                }else if(LayerBean.getLayer() == 1){
+                    presenter.getFacesetPhoto(LayerBean.getDirectory());
                 }
 
                 if(img_loading != null) {
@@ -171,6 +181,15 @@ public class FacesetFragment extends Fragment implements FacesetView{
         }else if(LayerBean.getLayer() == 1){
             presenter.getFacesetPhoto(LayerBean.getDirectory());
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+//        Logger.e("set X", String.valueOf(scrolledX));
+//        Logger.e("set Y", String.valueOf(scrolledY));
+//        ListScrollStateBean.setScrolledX(scrolledX);
+//        ListScrollStateBean.setScrolledY(scrolledY);
     }
 
     @Override
@@ -231,6 +250,26 @@ public class FacesetFragment extends Fragment implements FacesetView{
                 //mListener.setInDiretory(true);
             }
         });
+
+        list_dir.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                    int index = list_dir.getFirstVisiblePosition();
+                    View v = list_dir.getChildAt(0);
+                    int top = (v == null) ? 0 : v.getTop();
+                    //Logger.t("set index").e(String.valueOf(index));
+                    //Logger.t("set top").e(String.valueOf(top));
+                    ListScrollStateBean.setIndex(index);
+                    ListScrollStateBean.setTop(top);
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            }
+        });
+
     }
 
     @Override
@@ -275,6 +314,25 @@ public class FacesetFragment extends Fragment implements FacesetView{
                 //
             }
         });
+
+        gv_img.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                    int index = gv_img.getFirstVisiblePosition();
+                    View v = gv_img.getChildAt(0);
+                    int top = (v == null) ? 0 : v.getTop();
+                    //Logger.t("set index").e(String.valueOf(index));
+                    //Logger.t("set top").e(String.valueOf(top));
+                    GridScrollStateBean.setIndex(index);
+                    GridScrollStateBean.setTop(top);
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            }
+        });
     }
 
     @Override
@@ -295,6 +353,12 @@ public class FacesetFragment extends Fragment implements FacesetView{
         // TODO
         LayerBean.setLayer(0);
         EventBus.getDefault().post(new onChangeDirectoryEvent());
+
+        int index = ListScrollStateBean.getIndex();
+        int top = ListScrollStateBean.getTop();
+        //Logger.t("get index").e(String.valueOf(index));
+        //Logger.t("get top").e(String.valueOf(top));
+        list_dir.setSelectionFromTop(index, top);
         //
     }
 
@@ -307,6 +371,12 @@ public class FacesetFragment extends Fragment implements FacesetView{
         // TODO
         LayerBean.setLayer(1);
         EventBus.getDefault().post(new onChangeDirectoryEvent());
+
+        int index = GridScrollStateBean.getIndex();
+        int top = GridScrollStateBean.getTop();
+        //Logger.t("get index").e(String.valueOf(index));
+        //Logger.t("get top").e(String.valueOf(top));
+        gv_img.setSelection(index);
         //
     }
 
@@ -316,6 +386,8 @@ public class FacesetFragment extends Fragment implements FacesetView{
         }
         if(gv_img != null){
             gv_img.setVisibility(View.VISIBLE);
+            int index = GridScrollStateBean.getIndex();
+            gv_img.setSelection(index);
         }
         // TODO
         LayerBean.setLayer(1);
