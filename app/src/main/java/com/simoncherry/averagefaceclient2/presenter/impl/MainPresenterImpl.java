@@ -71,13 +71,14 @@ public class MainPresenterImpl implements MainPresenter{
 
         switch (index){
             case R.id.nav_faceset:
-                mainView.replaceFragment(new FacesetFragment(), MyApplication.TAG_FACESET);
+                //mainView.replaceFragment(new FacesetFragment(), MyApplication.TAG_FACESET);
+                mainView.replaceFragment(new FacesetFragment().newInstance(MyApplication.TAG_FACESET), MyApplication.TAG_FACESET);
                 break;
             case R.id.nav_cloud:
-                //mainView.replaceFragment(new MergeFragment(), MyApplication.TAG_OUTPUT);
+                //mainView.replaceFragment(new FacesetFragment(), MyApplication.TAG_OUTPUT);
                 break;
             case R.id.nav_output:
-                mainView.replaceFragment(new MergeFragment(), MyApplication.TAG_MERGE);
+                mainView.replaceFragment(new FacesetFragment().newInstance(MyApplication.TAG_OUTPUT), MyApplication.TAG_OUTPUT);
             default:
                 break;
         }

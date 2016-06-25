@@ -6,6 +6,8 @@ import android.content.Context;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.orhanobut.logger.Logger;
 
+import cn.jpush.android.api.JPushInterface;
+
 /**
  * Created by Simon on 2016/6/19.
  */
@@ -20,7 +22,10 @@ public class MyApplication extends Application {
     public final static String TAG_MERGE = "merge";
 
     public final static String URL_DIRECTORY = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
-    public final static String URL_FILE = "http://192.168.1.103:8128/AverageFaceServer/faceset/";
+    // TODO
+    //public final static String URL_FILE = "http://192.168.1.103:8128/AverageFaceServer/faceset/";
+    public final static String URL_FILE = "http://192.168.1.103:8128/AverageFaceServer/";
+    //
     public final static String URL_DOWNLOAD = "http://192.168.1.103:8128/AverageFaceServer/";
     public final static String URL_UPLOAD = "http://192.168.1.103:8128/AverageFaceServer/UploadFileServlet";
     public final static String URL_MERGE = "http://192.168.1.103:8128/AverageFaceServer/MergeFaceServlet";
@@ -32,6 +37,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+        JPushInterface.init(this);
         Fresco.initialize(this);
         Logger.init();
         Logger.t("onCreate").e("init Logger");

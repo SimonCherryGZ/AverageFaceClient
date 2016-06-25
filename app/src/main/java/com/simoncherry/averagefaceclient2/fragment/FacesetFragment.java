@@ -22,6 +22,7 @@ import com.facebook.imagepipeline.image.ImageInfo;
 import com.orhanobut.logger.Logger;
 import com.simoncherry.averagefaceclient2.R;
 import com.simoncherry.averagefaceclient2.adapter.DirectoryAdapter;
+import com.simoncherry.averagefaceclient2.application.MyApplication;
 import com.simoncherry.averagefaceclient2.base.LayerBean;
 import com.simoncherry.averagefaceclient2.bean.DirectoryBean;
 import com.simoncherry.averagefaceclient2.event.onChangeDirectoryEvent;
@@ -60,6 +61,9 @@ public class FacesetFragment extends Fragment implements FacesetView{
     private OnFragmentInteractionListener mListener;
     private boolean isInDirectory = false;
     private String currentDirectory = "";
+    // TODO
+    private String type = MyApplication.TAG_FACESET;
+    //
 
 
     public interface OnFragmentInteractionListener {
@@ -70,6 +74,16 @@ public class FacesetFragment extends Fragment implements FacesetView{
 
     public FacesetFragment() {
         // Required empty public constructor
+    }
+
+    public FacesetFragment newInstance(String type){
+        FacesetFragment myFacesetFragment = new FacesetFragment();
+
+        Bundle args = new Bundle();
+        args.putString("type", type);
+        myFacesetFragment.setArguments(args);
+
+        return myFacesetFragment;
     }
 
     public FacesetPresenter getPresenter(){
@@ -92,7 +106,9 @@ public class FacesetFragment extends Fragment implements FacesetView{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mImageLoader = ImageLoader.getInstance(3, ImageLoader.Type.LIFO);
-        presenter = new FacesetPresenterImpl(this);
+        // TODO
+        //presenter = new FacesetPresenterImpl(this);
+        //
         //mListener.setInDiretory(false);
         EventBus.getDefault().register(this);
     }
@@ -136,6 +152,12 @@ public class FacesetFragment extends Fragment implements FacesetView{
                 return PtrDefaultHandler.checkContentCanBePulledDown(frame, view, header);
             }
         });
+
+        // TODO
+        type = getArguments().getString("type");
+        presenter = new FacesetPresenterImpl(this, type);
+        //
+
         return view;
     }
 

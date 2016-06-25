@@ -32,11 +32,19 @@ public class FacesetPresenterImpl implements FacesetPresenter{
     private List<DirectoryBean> mBean;
     private ListAdapter mGridViewAdapter;
     private String imagePath[];
+    // TODO
+    private String type = MyApplication.TAG_FACESET;
+    //
 
-
-    public FacesetPresenterImpl(FacesetView facesetView){
+    // TODO
+    //public FacesetPresenterImpl(FacesetView facesetView){
+    public FacesetPresenterImpl(FacesetView facesetView, String type){
+    //
         this.facesetView = facesetView;
         this.handler = new Handler(Looper.getMainLooper());
+        // TODO
+        this.type = type;
+        //
     }
 
     @Override
@@ -49,7 +57,10 @@ public class FacesetPresenterImpl implements FacesetPresenter{
         OkHttpUtils.get().url(MyApplication.URL_DIRECTORY)
                 .addParams("request", "getdir")
                 .addParams("data", "null")
-                .addParams("type", "faceset")
+                // TODO
+                //.addParams("type", "faceset")
+                .addParams("type", type)
+                //
                 .build().execute(new MyStringCallBack(MyApplication.COMMAND_FACESET, "null"));
     }
 
@@ -58,7 +69,10 @@ public class FacesetPresenterImpl implements FacesetPresenter{
         OkHttpUtils.get().url(MyApplication.URL_DIRECTORY)
                 .addParams("request", "imglist")
                 .addParams("data", path)
-                .addParams("type", "faceset")
+                // TODO
+                //.addParams("type", "faceset")
+                .addParams("type", type)
+                //
                 .build().execute(new MyStringCallBack(MyApplication.COMMAND_PHOTO, path));
     }
 
@@ -100,7 +114,9 @@ public class FacesetPresenterImpl implements FacesetPresenter{
         imagePath = new String[arrayBean.length];
         for(int i=0; i<arrayBean.length; i++){
             //imagePath[i] = MyApplication.URL_FILE + selectDir + "/" + arrayBean[i].getImgPath();
-            imagePath[i] = MyApplication.URL_FILE + selectDir + "/" + arrayBean[i].getImgPath();
+            // TODO
+            imagePath[i] = MyApplication.URL_FILE + type +"/" + selectDir + "/" + arrayBean[i].getImgPath();
+            //
             //Logger.t("getImagePath").e(imagePath[i]);
         }
         return imagePath;

@@ -67,7 +67,10 @@ public class MainActivity extends AppCompatActivity implements MainView,
         setHomeAsUpBtnEnable(false);
         setRFABItem(RFAB_OUTDIR);
         presenter = new MainPresenterImpl(this);
-        replaceFragment(new FacesetFragment(), MyApplication.TAG_FACESET);
+        // TODO
+        //replaceFragment(new FacesetFragment(), MyApplication.TAG_FACESET);
+        replaceFragment(new FacesetFragment().newInstance(MyApplication.TAG_FACESET), MyApplication.TAG_FACESET);
+        //
         EventBus.getDefault().register(this);
     }
 
