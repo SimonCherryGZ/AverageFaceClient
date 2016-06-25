@@ -22,11 +22,18 @@ import com.facebook.imagepipeline.image.ImageInfo;
 import com.orhanobut.logger.Logger;
 import com.simoncherry.averagefaceclient2.R;
 import com.simoncherry.averagefaceclient2.adapter.DirectoryAdapter;
+import com.simoncherry.averagefaceclient2.base.LayerBean;
 import com.simoncherry.averagefaceclient2.bean.DirectoryBean;
+import com.simoncherry.averagefaceclient2.event.onChangeDirectoryEvent;
+import com.simoncherry.averagefaceclient2.event.onRefreshEvent;
 import com.simoncherry.averagefaceclient2.presenter.FacesetPresenter;
 import com.simoncherry.averagefaceclient2.presenter.impl.FacesetPresenterImpl;
 import com.simoncherry.averagefaceclient2.util.ImageLoader;
 import com.simoncherry.averagefaceclient2.view.FacesetView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
@@ -86,7 +93,8 @@ public class FacesetFragment extends Fragment implements FacesetView{
         super.onCreate(savedInstanceState);
         mImageLoader = ImageLoader.getInstance(3, ImageLoader.Type.LIFO);
         presenter = new FacesetPresenterImpl(this);
-        mListener.setInDiretory(false);
+        //mListener.setInDiretory(false);
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -99,7 +107,9 @@ public class FacesetFragment extends Fragment implements FacesetView{
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
                 if(isInDirectory){
-                    presenter.getFacesetPhoto(currentDirectory);
+                    // TODO
+                    //presenter.getFacesetPhoto(currentDirectory);
+                    presenter.getFacesetPhoto(LayerBean.getDirectory());
                 }else{
                     presenter.getFacesetDirectory();
                 }
@@ -133,7 +143,18 @@ public class FacesetFragment extends Fragment implements FacesetView{
     public void onResume() {
         super.onResume();
         showLoadingScene();
-        presenter.getFacesetDirectory();
+        // TODO
+        if(LayerBean.getLayer() == 0) {
+            presenter.getFacesetDirectory();
+        }else if(LayerBean.getLayer() == 1){
+            presenter.getFacesetPhoto(LayerBean.getDirectory());
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -179,8 +200,13 @@ public class FacesetFragment extends Fragment implements FacesetView{
                 String path = presenter.getDirectoryBean().get(position).getFileName();
                 currentDirectory = path;
                 isInDirectory = true;
+                // TODO
+                LayerBean.setLayer(1);
+                LayerBean.setDirectory(path);
+                EventBus.getDefault().post(new onChangeDirectoryEvent());
+                //
                 presenter.getFacesetPhoto(path);
-                mListener.setInDiretory(true);
+                //mListener.setInDiretory(true);
             }
         });
     }
@@ -221,6 +247,10 @@ public class FacesetFragment extends Fragment implements FacesetView{
                     }
                 });
                 mPhotoDraweeView.setController(controller.build());
+                // TODO
+                LayerBean.setLayer(2);
+                EventBus.getDefault().post(new onChangeDirectoryEvent());
+                //
             }
         });
     }
@@ -240,6 +270,10 @@ public class FacesetFragment extends Fragment implements FacesetView{
     public void showFacesetDirectory(DirectoryAdapter adapter) {
         list_dir.setAdapter(adapter);
         ptrFrame.refreshComplete();
+        // TODO
+        LayerBean.setLayer(0);
+        EventBus.getDefault().post(new onChangeDirectoryEvent());
+        //
     }
 
     @Override
@@ -248,6 +282,10 @@ public class FacesetFragment extends Fragment implements FacesetView{
         adapter_photo = new ListImgItemAdaper(getActivity(), 0, imagePath);
         gv_img.setAdapter(adapter_photo);
         ptrFrame.refreshComplete();
+        // TODO
+        LayerBean.setLayer(1);
+        EventBus.getDefault().post(new onChangeDirectoryEvent());
+        //
     }
 
     public void resumeFaceSet(){
@@ -257,6 +295,10 @@ public class FacesetFragment extends Fragment implements FacesetView{
         if(gv_img != null){
             gv_img.setVisibility(View.VISIBLE);
         }
+        // TODO
+        LayerBean.setLayer(1);
+        EventBus.getDefault().post(new onChangeDirectoryEvent());
+        //
     }
 
     private class ListImgItemAdaper extends ArrayAdapter<String> {
@@ -279,5 +321,17 @@ public class FacesetFragment extends Fragment implements FacesetView{
             return convertView;
         }
 
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(onRefreshEvent event){
+        Logger.e("onEvent");
+        if(LayerBean.getLayer() == 0) {
+            presenter.getFacesetDirectory();
+        }else if(LayerBean.getLayer() == 1){
+            presenter.getFacesetPhoto(LayerBean.getDirectory());
+        }else if(LayerBean.getLayer() == 2){
+            resumeFaceSet();
+        }
     }
 }

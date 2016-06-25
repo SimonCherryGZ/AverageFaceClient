@@ -14,11 +14,17 @@ public class MyApplication extends Application {
     public final static int INDEX_FACESET = 0;
     public final static int INDEX_OUTPUT = 1;
     public final static int INDEX_MERGE = 2;
+
     public final static String TAG_FACESET = "faceset";
     public final static String TAG_OUTPUT = "output";
     public final static String TAG_MERGE = "merge";
+
     public final static String URL_DIRECTORY = "http://192.168.1.103:8128/AverageFaceServer/DirectoryServlet";
     public final static String URL_FILE = "http://192.168.1.103:8128/AverageFaceServer/faceset/";
+    public final static String URL_DOWNLOAD = "http://192.168.1.103:8128/AverageFaceServer/";
+    public final static String URL_UPLOAD = "http://192.168.1.103:8128/AverageFaceServer/UploadFileServlet";
+    public final static String URL_MERGE = "http://192.168.1.103:8128/AverageFaceServer/MergeFaceServlet";
+
     public final static int COMMAND_FACESET = 0x123;
     public final static int COMMAND_PHOTO = 0x456;
 
